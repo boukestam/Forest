@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     public float JumpForce = 1;
 
     private bool Grounded = true;
+    private float sideMovement = 0.0f;
     
 	void Start () {
         
@@ -20,8 +21,23 @@ public class PlayerController : MonoBehaviour {
         }
     }
 	
-	void Update () {
-        float sideMovement = Input.GetAxis("Horizontal");
+	void FixedUpdate () {
+        float axisValue = Input.GetAxis("Horizontal");
+        sideMovement += axisValue * 0.1f;
+        sideMovement = sideMovement < -1.0f ? -1.0f : sideMovement > 1.0f ? 1.0f : sideMovement;
+        if (axisValue == 0.0f)
+        {
+            sideMovement *= 0.9f;
+            if (sideMovement < 0.001f && sideMovement > -0.001f)
+            {
+                sideMovement = 0.0f;
+            }
+        }
+
+        if (!Grounded)
+        {
+            sideMovement *= .5f;
+        }
 
         transform.position = new Vector3(
             transform.position.x + (sideMovement * SideSpeed * Time.deltaTime), 
