@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour {
     private GameObject Score;
     private GameObject DeathPanel;
     private GameObject Dog;
+
+    private float sideMovement = 0.0f;
     
 	void Start () {
         Score = GameObject.Find("Score");
@@ -46,8 +48,8 @@ public class PlayerController : MonoBehaviour {
             Die();
         }
     }
-	
-	void Update () {
+
+	void FixedUpdate () {
         if (Dead) {
             if (Input.GetButtonDown("Restart")) {
                 Restart();
@@ -56,7 +58,21 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        float sideMovement = Input.GetAxis("Horizontal");
+        float axisValue = Input.GetAxis("Horizontal");
+        sideMovement += axisValue * 0.1f;
+        sideMovement = sideMovement < -1.0f ? -1.0f : sideMovement > 1.0f ? 1.0f : sideMovement;
+        if (axisValue == 0.0f)
+        {
+            sideMovement *= 0.9f;
+            if (sideMovement < 0.001f && sideMovement > -0.001f)
+            {
+                sideMovement = 0.0f;
+            }
+        }
+
+        if (!Grounded){
+            sideMovement *= .5f;
+        }
 
         transform.position = new Vector3(
             transform.position.x + (sideMovement * SideSpeed * Time.deltaTime), 
