@@ -40,8 +40,7 @@ public class SpawnController : MonoBehaviour {
     private const float InitSpawnMinZ = 10f;
     private const float InitSpawnMaxZ = InitSpawnMinZ + SpawnLengthZ;
     private const float StartDespawnZ = -10f;
-    private const float ContinueSpawnMinZ = InitSpawnMaxZ + StartDespawnZ;
-    private const float ContinueSpawnMaxZ = ContinueSpawnMinZ + SpawnLengthZ;
+    private const float ContinueSpawnZ = SpawnLengthZ + StartDespawnZ;
 
     void Start () {
         Player = GameObject.FindWithTag("Player");
@@ -55,22 +54,25 @@ public class SpawnController : MonoBehaviour {
 
             Spawn(randomPosition);
         }
+        Spawned.Sort((obj1, obj2) => obj1.transform.position.z.CompareTo(obj2.transform.position.z));
     }
 	
 	void Update () {
         for(int i = 0; i < Spawned.Count; i++) {
-            if(Spawned[i].transform.position.z < Player.transform.position.z + StartDespawnZ) {
-                Destroy(Spawned[i]);
-                Spawned.RemoveAt(i);
-
-                Vector3 randomPosition = new Vector3(
-                    Random.Range(Player.transform.position.x - SpawnRadiusX, Player.transform.position.x + SpawnRadiusX),
-                    0,
-                    Random.Range(Player.transform.position.z + ContinueSpawnMinZ, Player.transform.position.z + ContinueSpawnMaxZ)
-                );
-
-                Spawn(randomPosition);
+            if(Spawned[i].transform.position.z >= Player.transform.position.z + StartDespawnZ) {
+                break;
             }
+            Destroy(Spawned[i]);
+            Spawned.RemoveAt(i);
+
+            Vector3 randomPosition = new Vector3(
+                Random.Range(Player.transform.position.x - SpawnRadiusX, Player.transform.position.x + SpawnRadiusX),
+                0,
+                Random.Range(Player.transform.position.z + ContinueSpawnZ, Player.transform.position.z + ContinueSpawnZ)
+            );
+
+            Spawn(randomPosition);
+
         }
     }
 }
