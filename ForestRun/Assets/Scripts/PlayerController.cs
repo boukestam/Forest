@@ -70,17 +70,19 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
+        float finalSideMovement = sideMovement;
+
         if (!Grounded){
-            sideMovement *= .5f;
+            finalSideMovement *= .5f;
         }
 
         transform.position = new Vector3(
-            transform.position.x + (sideMovement * SideSpeed * Time.deltaTime), 
+            transform.position.x + (axisValue * SideSpeed * Time.deltaTime), 
             transform.position.y, 
             transform.position.z + (ForwardSpeed * Time.deltaTime)
         );
 
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, -sideMovement * SideSpeed));
+        transform.rotation = Quaternion.Euler(new Vector3(0, finalSideMovement * SideSpeed, -finalSideMovement * SideSpeed));
 
         if (Grounded && Input.GetButtonDown("Jump")) {
             Grounded = false;
