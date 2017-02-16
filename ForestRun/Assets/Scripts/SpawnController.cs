@@ -19,7 +19,7 @@ public class SpawnController : MonoBehaviour {
     private const float SpawnLengthZ = RenderDistance - StartDespawnZ;
 
     private const float SpawnSurface = SpawnRadiusX * 2 * SpawnLengthZ;
-    private const double TreeDensity = 0.1f; // Amount of objects each square meter
+    private const double TreeDensity = 0.02f; // Amount of objects each square meter
     private const double FenceDensity = 0.01f; // Amount of objects each square meter
     private const double GrassDensity = 0.1f; // Amount of objects each square meter
     private const double TotalDensity = TreeDensity + FenceDensity + GrassDensity;
