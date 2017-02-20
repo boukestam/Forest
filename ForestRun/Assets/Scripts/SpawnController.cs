@@ -69,25 +69,34 @@ public class SpawnController : MonoBehaviour
         }
     }
 
+    public void Init() {
+        Debug.Log(Spawned.Count);
+        for (int i = Spawned.Count-1; i >= 0 ; i--) {
+            Destroy(Spawned[i]);
+            Spawned.RemoveAt(i);
+        }
+
+        float GameObjectCount = SpawnSurface * TotalDensity;
+        for (int i = 0; i < GameObjectCount; i++) {
+            Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(-SpawnRadiusX, SpawnRadiusX), 0, UnityEngine.Random.Range(InitSpawnMinZ, InitSpawnMaxZ));
+            SpawnRandom(randomPosition);
+        }
+        Spawned.Sort((obj1, obj2) => obj1.transform.position.z.CompareTo(obj2.transform.position.z));
+    }
+
     void Start()
     {
         Player = GameObject.FindWithTag("Player");
         Spawnable.Add(new SpawnableGameObject(0.03f, "Tree", spawnTree));
-        Spawnable.Add(new SpawnableGameObject(0.01f, "Fence", spawnFence));
+        Spawnable.Add(new SpawnableGameObject(0.007f, "Fence", spawnFence));
         Spawnable.Add(new SpawnableGameObject(0.1f, "Grass", spawnGrass));
 
         for (int i = 0; i < Spawnable.Count; i++)
         {
             TotalDensity += Spawnable[i].Density;
         }
-        float GameObjectCount = SpawnSurface * (float)TotalDensity;
 
-        for (int i = 0; i < GameObjectCount; i++)
-        {
-            Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(-SpawnRadiusX, SpawnRadiusX), 0, UnityEngine.Random.Range(InitSpawnMinZ, InitSpawnMaxZ));
-            SpawnRandom(randomPosition);
-        }
-        Spawned.Sort((obj1, obj2) => obj1.transform.position.z.CompareTo(obj2.transform.position.z));
+        Init();
     }
 
     void Update()
