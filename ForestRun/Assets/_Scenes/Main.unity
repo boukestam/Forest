@@ -268,6 +268,22 @@ Prefab:
       propertyPath: m_Name
       value: Dog
       objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.5480733
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.03861233
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.06861847
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8327162
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
   m_IsPrefabParent: 0
@@ -353,6 +369,7 @@ MonoBehaviour:
   ForwardSpeed: 10
   SideSpeed: 10
   JumpForce: 350
+  RunAnimationSpeed: 3
 --- !u!54 &702161522
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -551,7 +568,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 90
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
