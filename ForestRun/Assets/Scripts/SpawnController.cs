@@ -3,120 +3,142 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpawnController : MonoBehaviour
-{
+public class SpawnController : MonoBehaviour {
 
-    private const float SpawnRadiusX = 50f;
+    public float TreeDensity = 0.02f;
+    public float FenceDensity = 0.007f;
+    public float GrassDensity = 0.05f;
 
-    private const float RenderDistanceZ = 80f;
+    private const float ChunkWidthRadius = 150; // X axis
+    private const float ChunkLength = 30;  // Z axis
+
+    private const float BeginChunkZ = 10f;
     private const float StartDespawnZ = -10f;
-    private const float InitSpawnMinZ = 10f;
+    private const float MinimumRenderDistanceZ = 120f; // The minimum distance (from the player) that the furthest chunk is spawned.
 
-    class SpawnableGameObject
-    {
+    class SpawnableGameObject {
         public GameObject Resource;
-        public float Density;
         public Action<SpawnableGameObject, Vector3, List<GameObject>> SpawnFunc;
 
-        public SpawnableGameObject(float newDensity, string resourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc)
-        {
+        public SpawnableGameObject(string resourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc) {
             this.Resource = (GameObject)Resources.Load(resourceName);
-            this.Density = newDensity;
             this.SpawnFunc = newSpawnFunc;
         }
     }
 
-    private GameObject Player;
+    class SpawnableGroup : SpawnableGameObject {
+        public Func<float> Density;
 
+        public SpawnableGroup(string resourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc, Func<float> newDensity) : base(resourceName, newSpawnFunc) {
+            this.Density = newDensity;
+        }
+    }
 
-    private List<GameObject> Spawned = new List<GameObject>();
-    private List<SpawnableGameObject> Spawnable = new List<SpawnableGameObject>();
+    private static System.Random rand = new System.Random();
 
-    // pre-calculated variables
-    private const float SpawnLengthZ = RenderDistanceZ - StartDespawnZ;
-    private const float InitSpawnMaxZ = InitSpawnMinZ + SpawnLengthZ;
-    private const float ContinueSpawnZ = SpawnLengthZ + StartDespawnZ;
-    private const float SpawnSurface = SpawnRadiusX * 2 * SpawnLengthZ;
-    private float TotalDensity = 0;  // Amount of objects each square meter
+    class ChunkTemplate {
+        public float TotalDensity;
 
-    private System.Random rand = new System.Random();
+        public List<SpawnableGroup> SpawnTypes;
 
-    static void spawnTree(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned)
-    {
+        public ChunkTemplate(List<SpawnableGroup> newSpawnTypes) {
+            SpawnTypes = newSpawnTypes;
+            TotalDensity = getTotalDensity();
+        }
+
+        private float getTotalDensity() {
+            float density = 0;
+            for (int i = 0; i < SpawnTypes.Count; i++) {
+                density += SpawnTypes[i].Density();
+            }
+            return density;
+        }
+    }
+
+    class Chunk {
+        private float SpawnCount;
+        public Rect SpawnArea;
+
+        private List<GameObject> Spawned = new List<GameObject>();
+
+        public Chunk(ChunkTemplate chunkTemplate, Rect newSpawnArea) {
+            SpawnArea = newSpawnArea;
+            float spawnSurface = SpawnArea.width * SpawnArea.height;
+            SpawnCount = spawnSurface * chunkTemplate.TotalDensity;
+            for (int i = 0; i < SpawnCount; i++) {
+                Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(SpawnArea.xMin, SpawnArea.xMax), 0, UnityEngine.Random.Range(SpawnArea.yMin, SpawnArea.yMax));
+
+                // Spawn a random GameObject in the average of the density of all combined GameObjects.
+                double randNum = rand.NextDouble() * chunkTemplate.TotalDensity;
+                for (int i2 = 0; i2 < chunkTemplate.SpawnTypes.Count; i2++) {
+                    randNum -= chunkTemplate.SpawnTypes[i2].Density();
+                    if (randNum < 0) {
+                        chunkTemplate.SpawnTypes[i2].SpawnFunc(chunkTemplate.SpawnTypes[i2], randomPosition, Spawned);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void RemoveChunk() {
+            for (int i = Spawned.Count - 1; i >= 0; i--) {
+                UnityEngine.Object.DestroyImmediate(Spawned[i]);
+                Spawned.RemoveAt(i);
+            }
+        }
+    }
+
+    static void spawnTree(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         Spawned.Add(Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0))));
     }
-    static void spawnFence(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned)
-    {
+    static void spawnFence(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         Spawned.Add(Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero)));
     }
-    static void spawnGrass(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned)
-    {
+    static void spawnGrass(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         Spawned.Add(Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0))));
     }
 
-    void SpawnRandom(Vector3 pos)
-    {
-        double randNum = rand.NextDouble() * TotalDensity;
+    private ChunkTemplate testChunkTemplate;
+    private List<Chunk> chunks = new List<Chunk>();
 
-        for (int i = 0; i < Spawnable.Count; i++)
-        {
-            randNum -= Spawnable[i].Density;
-            if (randNum < 0)
-            {
-                Spawnable[i].SpawnFunc(Spawnable[i], pos, Spawned);
-                break;
-            }
-        }
-    }
+    private GameObject Player;
 
-    public void Init() {
-        Debug.Log(Spawned.Count);
-        for (int i = Spawned.Count-1; i >= 0 ; i--) {
-            Destroy(Spawned[i]);
-            Spawned.RemoveAt(i);
-        }
-
-        float GameObjectCount = SpawnSurface * TotalDensity;
-        for (int i = 0; i < GameObjectCount; i++) {
-            Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(-SpawnRadiusX, SpawnRadiusX), 0, UnityEngine.Random.Range(InitSpawnMinZ, InitSpawnMaxZ));
-            SpawnRandom(randomPosition);
-        }
-        Spawned.Sort((obj1, obj2) => obj1.transform.position.z.CompareTo(obj2.transform.position.z));
-    }
-
-    void Start()
-    {
+    void Start() {
         Player = GameObject.FindWithTag("Player");
-        Spawnable.Add(new SpawnableGameObject(0.03f, "Tree", spawnTree));
-        Spawnable.Add(new SpawnableGameObject(0.007f, "Fence", spawnFence));
-        Spawnable.Add(new SpawnableGameObject(0.1f, "Grass", spawnGrass));
 
-        for (int i = 0; i < Spawnable.Count; i++)
-        {
-            TotalDensity += Spawnable[i].Density;
-        }
+        List<SpawnableGroup> spawnableGroup = new List<SpawnableGroup>();
+        spawnableGroup.Add(new SpawnableGroup("Tree", spawnTree, () => TreeDensity));
+        spawnableGroup.Add(new SpawnableGroup("Fence", spawnFence, () => FenceDensity));
+        spawnableGroup.Add(new SpawnableGroup("Grass", spawnGrass, () => GrassDensity));
 
-        Init();
+        testChunkTemplate = new ChunkTemplate(spawnableGroup);
+
+        InitSpawns();
     }
 
-    void Update()
-    {
-        for (int i = 0; i < Spawned.Count; i++)
-        {
-            if (Spawned[i].transform.position.z >= Player.transform.position.z + StartDespawnZ)
-            {
-                break;
-            }
-            Destroy(Spawned[i]);
-            Spawned.RemoveAt(i);
-
-            Vector3 randomPosition = new Vector3(
-                UnityEngine.Random.Range(Player.transform.position.x - SpawnRadiusX, Player.transform.position.x + SpawnRadiusX),
-                0,
-                UnityEngine.Random.Range(Player.transform.position.z + ContinueSpawnZ, Player.transform.position.z + ContinueSpawnZ)
-            );
-
-            SpawnRandom(randomPosition);
+    void Update() {
+        // Delete chucks that are out of the screen.
+        if (chunks[0].SpawnArea.yMax - Player.transform.position.z < StartDespawnZ) {
+            chunks[0].RemoveChunk();
+            chunks.RemoveAt(0);
         }
+
+        float lastObjectLocation = chunks[chunks.Count - 1].SpawnArea.yMax;
+        if (lastObjectLocation - Player.transform.position.z < MinimumRenderDistanceZ) {
+            chunks.Add(new Chunk(testChunkTemplate, new Rect(Player.transform.position.x - ChunkWidthRadius, lastObjectLocation, ChunkWidthRadius * 2, ChunkLength)));
+        }
+    }
+
+    public void InitSpawns() {
+        for (int i = chunks.Count - 1; i >= 0; i--) {
+            chunks[i].RemoveChunk();
+        }
+        chunks.Clear();
+
+        float lastObjectLocation = BeginChunkZ;
+        do {
+            chunks.Add(new Chunk(testChunkTemplate, new Rect(Player.transform.position.x - ChunkWidthRadius, lastObjectLocation, ChunkWidthRadius * 2, ChunkLength)));
+            lastObjectLocation = chunks[chunks.Count - 1].SpawnArea.yMax;
+        } while (lastObjectLocation - Player.transform.position.z < MinimumRenderDistanceZ);
     }
 }
