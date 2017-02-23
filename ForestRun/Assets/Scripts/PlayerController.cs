@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour {
         DeathPanel.SetActive(false);
         Dog.GetComponent<Animation>().Play();
         transform.position = new Vector3(0, 0, -10f);
-        ((SpawnController)GameObject.Find("Spawner").GetComponent("SpawnController")).Init();
+        ((SpawnController)GameObject.Find("Spawner").GetComponent("SpawnController")).InitSpawns();
     }
 
     void OnCollisionEnter(Collision collision) {
