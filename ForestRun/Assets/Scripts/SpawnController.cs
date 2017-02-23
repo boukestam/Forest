@@ -10,7 +10,7 @@ public class SpawnController : MonoBehaviour {
     private static float GrassDensity = 0.05f;
     private static float RememberTreeDensity = TreeDensity; // Temporary cheat
 
-    private const float ChunkWidthRadius = 150; // X axis
+    private const float ChunkWidthRadius = 80; // X axis
     private const float ChunkLength = 2;  // Z axis
 
     private const float BeginChunkZ = 10f;
@@ -99,18 +99,18 @@ public class SpawnController : MonoBehaviour {
     static void spawnTree(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
-        //obj.transform.parent = self.ParentObject.transform;
+        obj.transform.parent = self.ParentObject.transform;
 
     }
     static void spawnFence(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero));
         Spawned.Add(obj);
-        //obj.transform.parent = self.ParentObject.transform;
+        obj.transform.parent = self.ParentObject.transform;
     }
     static void spawnGrass(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
-        //obj.transform.parent = self.ParentObject.transform;
+        obj.transform.parent = self.ParentObject.transform;
     }
 
     private ChunkTemplate testChunkTemplate;
@@ -139,7 +139,7 @@ public class SpawnController : MonoBehaviour {
 
         float lastObjectLocation = chunks[chunks.Count - 1].SpawnArea.yMax;
         if (lastObjectLocation - Player.transform.position.z < MinimumRenderDistanceZ) {
-            chunks.Add(new Chunk(testChunkTemplate, new Rect(Player.transform.position.x - ChunkWidthRadius, lastObjectLocation, ChunkWidthRadius * 2, ChunkLength)));
+            chunks.Add(new Chunk(testChunkTemplate, new Rect(-ChunkWidthRadius, lastObjectLocation, ChunkWidthRadius * 2, ChunkLength)));
         }
 
         if(Player.transform.position.z/DistanceTraveledBeforeDifficultyIncrease > Difficulty) {
