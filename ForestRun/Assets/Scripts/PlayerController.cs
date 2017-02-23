@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour {
         Dead = false;
         DeathPanel.SetActive(false);
         Dog.GetComponent<Animation>().Play();
-        transform.position = new Vector3(0, 0, -10f);
+        transform.position = new Vector3(0, 0, 0f);
         ((SpawnController)GameObject.Find("Spawner").GetComponent("SpawnController")).RestartSpawns();
     }
 
