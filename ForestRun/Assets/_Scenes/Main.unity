@@ -152,13 +152,15 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 2
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Fool! You died...
+  m_Text: 'Fool! You died...
+
+    (press R to restart)'
 --- !u!222 &85736240
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -182,7 +184,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400042, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400042, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
       propertyPath: m_LocalRotation.x
@@ -693,6 +695,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2447135f0ed98b44a18ed9c8e5cf684, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TreeDensity: 0.02
+  FenceDensity: 0.007
+  GrassDensity: 0.05
 --- !u!4 &1590464188
 Transform:
   m_ObjectHideFlags: 0
@@ -784,7 +789,7 @@ Transform:
   m_GameObject: {fileID: 1705821840}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100000, y: 1, z: 100000}
+  m_LocalScale: {x: 100000, y: 0.98346215, z: 100000}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
