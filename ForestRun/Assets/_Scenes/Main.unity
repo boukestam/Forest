@@ -593,7 +593,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1435286798}
   m_LocalRotation: {x: 0.17309873, y: -0, z: -0, w: 0.9849045}
-  m_LocalPosition: {x: 0, y: 1.78, z: -0.6999998}
+  m_LocalPosition: {x: 0, y: 2, z: -2.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 702161520}
@@ -695,9 +695,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2447135f0ed98b44a18ed9c8e5cf684, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TreeDensity: 0.02
-  FenceDensity: 0.007
-  GrassDensity: 0.05
 --- !u!4 &1590464188
 Transform:
   m_ObjectHideFlags: 0

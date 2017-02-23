@@ -11,13 +11,13 @@ public class SpawnController : MonoBehaviour {
     private static float RememberTreeDensity = TreeDensity; // Temporary cheat
 
     private const float ChunkWidthRadius = 150; // X axis
-    private const float ChunkLength = 30;  // Z axis
+    private const float ChunkLength = 2;  // Z axis
 
     private const float BeginChunkZ = 10f;
     private const float StartDespawnZ = -10f;
     private const float MinimumRenderDistanceZ = 120f; // The minimum distance (from the player) that the furthest chunk is spawned.
 
-    private float DistanceTraveledBeforeDifficultyIncrease = 30f;
+    private float DistanceTraveledBeforeDifficultyIncrease = 10f;
     private float DifficultyIncreaseForTrees = 0.00005f;
     private float Difficulty = 1f;
 
@@ -99,18 +99,18 @@ public class SpawnController : MonoBehaviour {
     static void spawnTree(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
-        obj.transform.parent = self.ParentObject.transform;
+        //obj.transform.parent = self.ParentObject.transform;
 
     }
     static void spawnFence(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero));
         Spawned.Add(obj);
-        obj.transform.parent = self.ParentObject.transform;
+        //obj.transform.parent = self.ParentObject.transform;
     }
     static void spawnGrass(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
-        obj.transform.parent = self.ParentObject.transform;
+        //obj.transform.parent = self.ParentObject.transform;
     }
 
     private ChunkTemplate testChunkTemplate;
