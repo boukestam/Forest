@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour {
     public float ForwardSpeed = 1;
     public float SideSpeed = 1;
     public float JumpForce = 1;
+    public float RunAnimationSpeed = 3f;
 
     private bool Grounded = true;
     private bool Dead = false;
@@ -25,7 +26,7 @@ public class PlayerController : MonoBehaviour {
         DeathPanel.SetActive(false);
 
         Dog = GameObject.Find("Dog");
-        Dog.GetComponent<Animation>()["Running"].speed = 2f;
+        Dog.GetComponent<Animation>()["Running"].speed = RunAnimationSpeed;
     }
 
     void Die() {
@@ -39,7 +40,7 @@ public class PlayerController : MonoBehaviour {
         DeathPanel.SetActive(false);
         Dog.GetComponent<Animation>().Play();
         transform.position = new Vector3(0, 0, -10f);
-        ((SpawnController)GameObject.Find("Spawner").GetComponent("SpawnController")).Init();
+        ((SpawnController)GameObject.Find("Spawner").GetComponent("SpawnController")).InitSpawns();
     }
 
     void OnCollisionEnter(Collision collision) {
@@ -83,7 +84,7 @@ public class PlayerController : MonoBehaviour {
             transform.position.z + (ForwardSpeed * Time.deltaTime)
         );
 
-        transform.rotation = Quaternion.Euler(new Vector3(0, finalSideMovement * SideSpeed, -finalSideMovement * SideSpeed));
+        //transform.rotation = Quaternion.Euler(new Vector3(0, finalSideMovement * SideSpeed, -finalSideMovement * SideSpeed));
 
         if (Grounded && Input.GetButtonDown("Jump")) {
             Grounded = false;

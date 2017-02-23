@@ -152,13 +152,15 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 2
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Fool! You died...
+  m_Text: 'Fool! You died...
+
+    (press R to restart)'
 --- !u!222 &85736240
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -268,6 +270,22 @@ Prefab:
       propertyPath: m_Name
       value: Dog
       objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.5480733
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.03861233
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.06861847
+      objectReference: {fileID: 0}
+    - target: {fileID: 400002, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8327162
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: bebc937b662cb9b4ab0e9db6d768f931, type: 3}
   m_IsPrefabParent: 0
@@ -353,6 +371,7 @@ MonoBehaviour:
   ForwardSpeed: 10
   SideSpeed: 10
   JumpForce: 350
+  RunAnimationSpeed: 3
 --- !u!54 &702161522
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -551,7 +570,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 90
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -676,6 +695,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2447135f0ed98b44a18ed9c8e5cf684, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TreeDensity: 0.02
+  FenceDensity: 0.007
+  GrassDensity: 0.05
 --- !u!4 &1590464188
 Transform:
   m_ObjectHideFlags: 0

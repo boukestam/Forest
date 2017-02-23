@@ -6,13 +6,17 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour {
+    
+    public float ForwardSpeed = 1;
+    public float JumpForce = 1;
+    public float RunAnimationSpeed = 3f;
 
     private bool loadLock = false;
     string nextSceneName;
     AsyncOperation async;
 
     private GameObject Player;
-    
+    private GameObject Dog;
 
     public void StartGame(string sceneName)
     {
@@ -33,6 +37,9 @@ public class MenuController : MonoBehaviour {
     void Start()
     {
         Player = GameObject.FindWithTag("Player");
+
+        Dog = GameObject.Find("Dog");
+        Dog.GetComponent<Animation>()["Running"].speed = RunAnimationSpeed;
     }
     
     void FixedUpdate()
