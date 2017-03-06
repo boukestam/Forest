@@ -11,13 +11,13 @@ public class SpawnController : MonoBehaviour {
     private static float RememberTreeDensity = TreeDensity; // Temporary cheat
 
     private const float ChunkWidthRadius = 150; // X axis
-    private const float ChunkLength = 30;  // Z axis
+    private const float ChunkLength = 2;  // Z axis
 
     private const float BeginChunkZ = 10f;
     private const float StartDespawnZ = -10f;
     private const float MinimumRenderDistanceZ = 120f; // The minimum distance (from the player) that the furthest chunk is spawned.
 
-    private float DistanceTraveledBeforeDifficultyIncrease = 30f;
+    private float DistanceTraveledBeforeDifficultyIncrease = 100f;
     private float DifficultyIncreaseForTrees = 0.00005f;
     private float Difficulty = 1f;
 

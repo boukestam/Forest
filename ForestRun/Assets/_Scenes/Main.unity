@@ -695,9 +695,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2447135f0ed98b44a18ed9c8e5cf684, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TreeDensity: 0.02
-  FenceDensity: 0.007
-  GrassDensity: 0.05
 --- !u!4 &1590464188
 Transform:
   m_ObjectHideFlags: 0
