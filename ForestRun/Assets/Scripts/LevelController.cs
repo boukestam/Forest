@@ -55,7 +55,7 @@ public class LevelManager {
             levels[currentLevel].clearLevel();
             currentLevel++;
             Debug.Log("New level!!!!");
-            if(currentLevel >= levels.Count) {
+            if (currentLevel >= levels.Count) {
                 currentLevel = levels.Count - 1;
             }
         }
@@ -103,7 +103,7 @@ public class Level {
     }
 
     public bool completedLevel() {
-        return Player.transform.position.z  > this.EndZ;
+        return Player.transform.position.z > this.EndZ;
     }
 
     public void ResetLevel() {
@@ -115,18 +115,18 @@ public class Level {
             furdestLocationZ = chunks[chunks.Count - 1].SpawnArea.yMax;
         } while (furdestLocationZ - this.StartZ < MinimumRenderDistanceZ);
     }
-    
+
     public void clearLevel() {
-        for(int i = chunks.Count-1; i >= 0; i--) {
+        for (int i = chunks.Count - 1; i >= 0; i--) {
             this.removeChunk(i);
         }
     }
- 
+
     private void removeChunk(int index) {
         chunks[index].RemoveChunk();
         chunks.RemoveAt(index);
     }
-    
+
     private void spawnChunk(float chunkZ) {
         if (this.EndZ > chunkZ + ChunkLength) { // Prevent new chunk spawning past the map.
             if (this.StartZ <= chunkZ) { // Prevent new chunk spawning before the map.
