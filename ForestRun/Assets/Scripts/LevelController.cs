@@ -99,7 +99,9 @@ public class LevelManager {
 
     public void RestartCurrentLevel() {
         levels[currentLevel].ResetLevel();
-        levels[currentLevel+1].ClearLevel();
+        if (currentLevel + 1 < levels.Count) {
+            levels[currentLevel + 1].ClearLevel();
+        }
         GameObject.FindWithTag("Player").transform.position = new Vector3(0, 0, levels[currentLevel].StartZ);
     }
 }
