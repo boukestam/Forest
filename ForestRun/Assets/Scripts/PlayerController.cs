@@ -12,12 +12,14 @@ public class PlayerController : MonoBehaviour {
 
     private bool Grounded = true;
     private bool Dead = false;
+    private bool FreezeBool = false;
 
     private GameObject Score;
     private GameObject DeathPanel;
     private GameObject Dog;
 
     private float sideMovement = 0.0f;
+    private int points = 0;
     
 	void Start () {
         Score = GameObject.Find("Score");
@@ -29,22 +31,37 @@ public class PlayerController : MonoBehaviour {
         Dog.GetComponent<Animation>()["Running"].speed = RunAnimationSpeed;
     }
 
+    public void Freeze() {
+        FreezeBool = true;
+        Dog.GetComponent<Animation>().Stop();
+    }
+
+    public void Unfreeze() {
+        FreezeBool = false;
+        Dog.GetComponent<Animation>().Play();
+    }
+
     void Die() {
         Dead = true;
         DeathPanel.SetActive(true);
-        Dog.GetComponent<Animation>().Stop();
+        Freeze();
+
     }
 
     void Restart() {
         Dead = false;
         DeathPanel.SetActive(false);
-        Dog.GetComponent<Animation>().Play();
+        Unfreeze();
+        points = 0;
+        
         ((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
     }
 
     void OnCollisionEnter(Collision collision) {
         if(collision.collider.tag == "Ground") {
             Grounded = true;
+        } else if(collision.collider.tag == "Item") {
+            points++;
         } else {
             Die();
         }
@@ -54,9 +71,10 @@ public class PlayerController : MonoBehaviour {
         if (Dead) {
             if (Input.GetButtonDown("Restart")) {
                 Restart();
-            } else {
-                return;
             }
+        }
+        if (FreezeBool) {
+            return;
         }
 
         float axisValue = Input.GetAxis("Horizontal");
@@ -90,6 +108,6 @@ public class PlayerController : MonoBehaviour {
             GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0));
         }
 
-        Score.GetComponent<Text>().text = ((int)transform.position.z).ToString();
+        Score.GetComponent<Text>().text = (points).ToString();
 	}
 }

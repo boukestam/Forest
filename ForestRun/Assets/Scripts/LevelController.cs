@@ -25,8 +25,8 @@ public class LevelController : MonoBehaviour {
         }, (GameObject)Resources.Load("GrassPlane"));
 
         levelManager = new LevelManager(new List<Level>() {
-            new Level(forestChunkTemplate, 0, 300, 80),
-            new Level(forestChunkTemplate2, 300, 1000, 80)
+            new Level(forestChunkTemplate, 0, 100, 80),
+            new Level(forestChunkTemplate2, 100, 1000, 80)
         });
 
         RestartCurrentLevel();
@@ -44,25 +44,55 @@ public class LevelController : MonoBehaviour {
 public class LevelManager {
     List<Level> levels;
     private int currentLevel = 0;
+    private GameObject scorePanel;
+    private PlayerController playerController;
+    bool scoreMenu = false;
 
     public LevelManager(List<Level> newLevels) {
         this.levels = newLevels;
+        scorePanel = GameObject.Find("ScorePanel");
+        scorePanel.SetActive(false);
+        playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+    }
+
+    private void EnterScore() {
+        scoreMenu = true;
+        scorePanel.SetActive(true);
+        playerController.Freeze();
+    }
+
+    private void ExitScore() {
+        scoreMenu = false;
+        scorePanel.SetActive(false);
+        playerController.Unfreeze();
+    }
+
+    private void NextLevel() {
+        ExitScore();
+        levels[currentLevel].ClearLevel();
+        currentLevel++;
+        if (currentLevel >= levels.Count) {
+            currentLevel = levels.Count - 1;
+        }
     }
 
     public void Update() {
-        // Check for going to new level.
-        if (levels[currentLevel].completedLevel()) {
-            levels[currentLevel].ClearLevel();
-            currentLevel++;
-            Debug.Log("New level!!!!");
-            if (currentLevel >= levels.Count) {
-                currentLevel = levels.Count - 1;
+        if (scoreMenu) {
+            Debug.Log("c");
+            if (Input.GetButtonDown("Submit")) {
+                Debug.Log("NEXT LEVEL PLEASE???");
+                NextLevel();
             }
-        }
+        } else {
+            // Check for going to new level.
+            if (levels[currentLevel].completedLevel()) {
+                EnterScore();
+            }
 
-        levels[currentLevel].Update();
-        if (currentLevel+1 < levels.Count) {
-            levels[currentLevel+1].Update();
+            levels[currentLevel].Update();
+            if (currentLevel + 1 < levels.Count) {
+                levels[currentLevel + 1].Update();
+            }
         }
     }
 
@@ -107,7 +137,7 @@ public class Level {
     }
 
     public bool completedLevel() {
-        return Player.transform.position.z > this.EndZ;
+        return Player.transform.position.z + ChunkLength/2 >= this.EndZ;
     }
 
     public void ResetLevel() {

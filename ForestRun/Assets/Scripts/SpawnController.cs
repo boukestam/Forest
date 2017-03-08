@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpawnController : MonoBehaviour {
-    public static void spawnTreeFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnTreeFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
 
     }
-    public static void spawnFenceFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnFenceFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
     }
-    public static void spawnGrassFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnGrassFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
@@ -28,13 +28,13 @@ public class SpawnController : MonoBehaviour {
     }
 }
 
-public class SpawnableGameObject {
+public class SpawnableDensityObject {
     public GameObject ParentObject;
     public GameObject Resource;
     public string resourceName;
-    public Action<SpawnableGameObject, Vector3, List<GameObject>> SpawnFunc;
+    public Action<SpawnableDensityObject, Vector3, List<GameObject>> SpawnFunc;
 
-    public SpawnableGameObject(string newResourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc) {
+    public SpawnableDensityObject(string newResourceName, Action<SpawnableDensityObject, Vector3, List<GameObject>> newSpawnFunc) {
         ParentObject = new GameObject();
         ParentObject.name = newResourceName;
         this.Resource = (GameObject)Resources.Load(newResourceName);
@@ -43,10 +43,10 @@ public class SpawnableGameObject {
     }
 }
 
-public class SpawnableGroup : SpawnableGameObject {
+public class SpawnableGroup : SpawnableDensityObject {
     public Func<float> Density;
 
-    public SpawnableGroup(string resourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc, Func<float> newDensity) : base(resourceName, newSpawnFunc) {
+    public SpawnableGroup(string resourceName, Action<SpawnableDensityObject, Vector3, List<GameObject>> newSpawnFunc, Func<float> newDensity) : base(resourceName, newSpawnFunc) {
         this.Density = newDensity;
     }
 }
