@@ -19,6 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4309840137753628}
+  - component: {fileID: 65409610043782190}
   m_Layer: 0
   m_Name: BoneItem
   m_TagString: Item
@@ -108,3 +109,15 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1954531085492806}
   m_Mesh: {fileID: 4300000, guid: d2d906eb8d3b9fd4daad2be6d3b202e9, type: 3}
+--- !u!65 &65409610043782190
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1050277281675142}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.6, y: 0.9, z: 0.7}
+  m_Center: {x: 0.05, y: 0.5, z: 0.1}

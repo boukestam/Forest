@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
@@ -55,20 +56,22 @@ public class LevelManager {
         playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
     }
 
-    private void EnterScore() {
+    private void EnterScorePanel() {
         scoreMenu = true;
         scorePanel.SetActive(true);
+        scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: "+ playerController.getPoints();
         playerController.Freeze();
     }
 
-    private void ExitScore() {
+    private void ExitScorePanel() {
         scoreMenu = false;
         scorePanel.SetActive(false);
         playerController.Unfreeze();
     }
 
     private void NextLevel() {
-        ExitScore();
+        playerController.setPoints(0);
+        ExitScorePanel();
         levels[currentLevel].ClearLevel();
         currentLevel++;
         if (currentLevel >= levels.Count) {
@@ -78,15 +81,13 @@ public class LevelManager {
 
     public void Update() {
         if (scoreMenu) {
-            Debug.Log("c");
             if (Input.GetButtonDown("Submit")) {
-                Debug.Log("NEXT LEVEL PLEASE???");
                 NextLevel();
             }
         } else {
             // Check for going to new level.
             if (levels[currentLevel].completedLevel()) {
-                EnterScore();
+                EnterScorePanel();
             }
 
             levels[currentLevel].Update();
@@ -114,6 +115,7 @@ public class Level {
     private float ChunkWidthRadius;
 
     private List<Chunk> chunks = new List<Chunk>();
+    public List<Vector3> itemPath = new List<Vector3>();
 
     public Level(ChunkTemplate template, float startZ, float endZ, float chunkWidthRadius) {
         Player = GameObject.FindWithTag("Player");
@@ -121,6 +123,12 @@ public class Level {
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+
+        // Temporary faking a straight item path
+        float length = 10;
+        for (int i = 1; i < 20; i++) {
+            itemPath.Add(new Vector3(0,0, length*i));
+        }
     }
 
     public void Update() {
@@ -137,7 +145,7 @@ public class Level {
     }
 
     public bool completedLevel() {
-        return Player.transform.position.z + ChunkLength/2 >= this.EndZ;
+        return Player.transform.position.z + ChunkLength >= this.EndZ;
     }
 
     public void ResetLevel() {
@@ -161,11 +169,25 @@ public class Level {
         chunks.RemoveAt(index);
     }
 
-    private void SpawnChunk(float chunkZ) {
-        if (chunkZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
-            if (chunkZ >= this.StartZ) { // Prevent new chunk spawning before the map.
-                chunks.Add(new Chunk(Template, new Rect(-ChunkWidthRadius, chunkZ, ChunkWidthRadius * 2, ChunkLength)));
-                if(chunkZ + ChunkLength == this.EndZ) { // If last chunk add finish.
+    private void SpawnChunk(float chunkStartZ) {
+        if (chunkStartZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
+            if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
+                Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
+                chunks.Add(newChunk);
+
+                // Add coins to the chunk.
+                float chunkStartRelativeZ = chunkStartZ - this.StartZ;
+                for (int i=0;i< itemPath.Count; i++) {
+                    Vector3 coinLocation = itemPath[i];
+                    if (coinLocation.z > chunkStartRelativeZ && coinLocation.z <= chunkStartRelativeZ + ChunkLength) {
+                        coinLocation.z -= chunkStartRelativeZ;
+                        SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), coinLocation);
+                    }
+                    
+                }
+
+                // If last chunk add finish plane.
+                if (chunkStartZ + ChunkLength == this.EndZ) { 
                     Chunk lastChunk = chunks[chunks.Count - 1];
                     SpawnController.spawnPlaneFunc(lastChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
                 }

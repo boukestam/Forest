@@ -31,6 +31,18 @@ public class PlayerController : MonoBehaviour {
         Dog.GetComponent<Animation>()["Running"].speed = RunAnimationSpeed;
     }
 
+    public void addPoints(int amount) {
+        points += amount;
+    }
+
+    public void setPoints(int newPoints) {
+        points = newPoints;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
     public void Freeze() {
         FreezeBool = true;
         Dog.GetComponent<Animation>().Stop();
@@ -52,7 +64,7 @@ public class PlayerController : MonoBehaviour {
         Dead = false;
         DeathPanel.SetActive(false);
         Unfreeze();
-        points = 0;
+        setPoints(0);
         
         ((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
     }
@@ -61,7 +73,8 @@ public class PlayerController : MonoBehaviour {
         if(collision.collider.tag == "Ground") {
             Grounded = true;
         } else if(collision.collider.tag == "Item") {
-            points++;
+            Destroy(collision.collider.gameObject);
+            addPoints(1);
         } else {
             Die();
         }

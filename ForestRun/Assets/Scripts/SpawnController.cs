@@ -26,6 +26,11 @@ public class SpawnController : MonoBehaviour {
         chunk.Spawned.Add(obj);
         obj.transform.parent = chunk.chunkTemplate.PlaneParent.transform;
     }
+    public static void spawnItem(Chunk chunk, GameObject item, Vector3 offset) {
+        GameObject obj = Instantiate(item, offset + new Vector3(0, 0, chunk.SpawnArea.y), Quaternion.identity);
+        chunk.Spawned.Add(obj);
+        //obj.transform.parent = chunk.chunkTemplate.PlaneParent.transform;
+    }
 }
 
 public class SpawnableDensityObject {
