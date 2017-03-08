@@ -52,7 +52,7 @@ public class LevelManager {
     public void Update() {
         // Check for going to new level.
         if (levels[currentLevel].completedLevel()) {
-            levels[currentLevel].clearLevel();
+            levels[currentLevel].ClearLevel();
             currentLevel++;
             Debug.Log("New level!!!!");
             if (currentLevel >= levels.Count) {
@@ -61,10 +61,14 @@ public class LevelManager {
         }
 
         levels[currentLevel].Update();
+        if (currentLevel+1 < levels.Count) {
+            levels[currentLevel+1].Update();
+        }
     }
 
     public void RestartCurrentLevel() {
         levels[currentLevel].ResetLevel();
+        levels[currentLevel+1].ClearLevel();
         GameObject.FindWithTag("Player").transform.position = new Vector3(0, 0, levels[currentLevel].StartZ);
     }
 }
@@ -98,7 +102,7 @@ public class Level {
         // Add chunks when close enough to the edge of all chunks.
         float furdestLocationZ = (chunks.Count > 0) ? chunks[chunks.Count - 1].SpawnArea.yMax : this.StartZ;
         if (furdestLocationZ - Player.transform.position.z < MinimumRenderDistanceZ) {
-            spawnChunk(furdestLocationZ);
+            SpawnChunk(furdestLocationZ);
         }
     }
 
@@ -107,16 +111,16 @@ public class Level {
     }
 
     public void ResetLevel() {
-        clearLevel();
+        ClearLevel();
 
         float furdestLocationZ = this.StartZ;
         do {
-            spawnChunk(furdestLocationZ);
+            SpawnChunk(furdestLocationZ);
             furdestLocationZ = chunks[chunks.Count - 1].SpawnArea.yMax;
         } while (furdestLocationZ - this.StartZ < MinimumRenderDistanceZ);
     }
 
-    public void clearLevel() {
+    public void ClearLevel() {
         for (int i = chunks.Count - 1; i >= 0; i--) {
             this.removeChunk(i);
         }
@@ -127,10 +131,14 @@ public class Level {
         chunks.RemoveAt(index);
     }
 
-    private void spawnChunk(float chunkZ) {
-        if (this.EndZ > chunkZ + ChunkLength) { // Prevent new chunk spawning past the map.
-            if (this.StartZ <= chunkZ) { // Prevent new chunk spawning before the map.
+    private void SpawnChunk(float chunkZ) {
+        if (chunkZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
+            if (chunkZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 chunks.Add(new Chunk(Template, new Rect(-ChunkWidthRadius, chunkZ, ChunkWidthRadius * 2, ChunkLength)));
+                if(chunkZ + ChunkLength == this.EndZ) { // If last chunk add finish.
+                    Chunk lastChunk = chunks[chunks.Count - 1];
+                    SpawnController.spawnPlaneFunc(lastChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
+                }
             }
         }
     }
