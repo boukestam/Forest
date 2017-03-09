@@ -179,8 +179,8 @@ public class Level {
         // For testing
         GameObject pathBlueprint = (GameObject)Resources.Load("Path");
 
-        if (this.EndZ >= chunkStartZ + ChunkLength) { // Prevent new chunk spawning past the map.
-            if (this.StartZ <= chunkStartZ) { // Prevent new chunk spawning before the map.
+        if (chunkStartZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
+            if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
 
                 // Clear path in chunk
@@ -217,16 +217,20 @@ public class Level {
                 for (int i = 0; i < path.Count; i++) {
                     Vector3 boneLocation = path[i];
                     if (boneLocation.z > chunkStartZ && boneLocation.z <= chunkStartZ + ChunkLength) {
-                        boneLocation.z -= chunkStartZ;
-                        SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
+                        if (Random.Range(0.0f, 1.0f) > 0.9f) {
+                            boneLocation.z -= chunkStartZ;
+                            if (Random.Range(0.0f, 1.0f) >= 0.5f) {
+                                boneLocation.x += Random.Range(1, 2);
+                            }
+                            SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
+                        }
                     }
 
                 }
 
                 // If last chunk add finish plane.
                 if (chunkStartZ + ChunkLength == this.EndZ) {
-                    Chunk lastChunk = chunks[chunks.Count - 1];
-                    SpawnController.spawnPlaneFunc(lastChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
+                    SpawnController.spawnPlaneFunc(newChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
                 }
 
                 chunks.Add(newChunk);
