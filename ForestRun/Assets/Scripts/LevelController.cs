@@ -7,6 +7,18 @@ public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
 
     void Start() {
+        levelManager = new LevelManager();
+        LoadLevels();
+
+        RestartCurrentLevel();
+    }
+
+    void Update() {
+        levelManager.Update();
+    }
+
+    public static void LoadLevels()
+    {
         const float forestTreeDensity = 0.01f;
         const float forestFenceDensity = 0.004f;
         const float forestGrassDensity = 0.05f;
@@ -25,38 +37,41 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
         }, (GameObject)Resources.Load("GrassPlane"));
 
-        levelManager = new LevelManager(new List<Level>() {
-            new Level(forestChunkTemplate, 0, 100, 80),
-            new Level(forestChunkTemplate2, 100, 1000, 80)
-        });
+        LevelManager.levels = new List<Level>();
+        LevelManager.levels.Add(new Level(1, forestChunkTemplate, 0, 100, 80, true));
+        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, 100, 1000, 80));
 
-        RestartCurrentLevel();
-    }
+        /*levelManager = new LevelManager(new List<Level>() {
+            new Level(1, forestChunkTemplate, 0, 100, 80, true),
+            new Level(2, forestChunkTemplate2, 100, 1000, 80)
+        });*/
 
-    void Update() {
-        levelManager.Update();
     }
 
     public void RestartCurrentLevel() {
         levelManager.RestartCurrentLevel();
     }
 }
-
+[System.Serializable]
 public class LevelManager {
-    List<Level> levels;
-    private int currentLevel = 0;
+    public static List<Level> levels;
+    private int currentLevel;
     private GameObject scorePanel;
     private PlayerController playerController;
     bool scoreMenu = false;
 
-    public LevelManager(List<Level> newLevels) {
-        this.levels = newLevels;
+    public LevelManager() {
         scorePanel = GameObject.Find("ScorePanel");
         scorePanel.SetActive(false);
         playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        currentLevel = PlayerPrefs.GetInt("lastPlayedLevel") - 1;
     }
 
     private void EnterScorePanel() {
+        if (playerController.getPoints() > PlayerPrefs.GetInt("Level" + (currentLevel + 1) + "_score"))
+        {
+            PlayerPrefs.SetInt("Level" + (currentLevel + 1) + "_score", playerController.getPoints());
+        }
         scoreMenu = true;
         scorePanel.SetActive(true);
         scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: "+ playerController.getPoints();
@@ -69,11 +84,15 @@ public class LevelManager {
         playerController.Unfreeze();
     }
 
-    private void NextLevel() {
+    private void NextLevel()
+    {
         playerController.setPoints(0);
         ExitScorePanel();
         levels[currentLevel].ClearLevel();
         currentLevel++;
+        //Unlock new level and save this level as last level
+        PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 1);
+        PlayerPrefs.SetInt("Level" + (currentLevel + 1), 1);
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
@@ -106,7 +125,12 @@ public class LevelManager {
     }
 }
 
+[System.Serializable]
 public class Level {
+    public int levelNumber;
+    public bool unlocked;
+    public bool isInteractable;
+
     private GameObject Player;
     private static float StartDespawnZ = -10;
     private static float MinimumRenderDistanceZ = 80;
@@ -119,12 +143,15 @@ public class Level {
     private List<Chunk> chunks = new List<Chunk>();
     public List<Vector3> itemPath = new List<Vector3>();
 
-    public Level(ChunkTemplate template, float startZ, float endZ, float chunkWidthRadius) {
+    public Level(int number, ChunkTemplate template, float startZ, float endZ, float chunkWidthRadius, bool unlocked = false) {
         Player = GameObject.FindWithTag("Player");
+        this.levelNumber = number;
         this.Template = template;
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+        this.unlocked = unlocked;
+        this.isInteractable = unlocked;
 
         // Temporary faking a straight item path
         float length = 10;

@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     public float SideSpeed = 1;
     public float JumpForce = 1;
     public float RunAnimationSpeed = 3f;
+    public bool enchantedMovement = true;
 
     private bool Grounded = true;
     private bool Dead = false;
@@ -89,33 +90,41 @@ public class PlayerController : MonoBehaviour {
         if (FreezeBool) {
             return;
         }
-
+        
         float axisValue = Input.GetAxis("Horizontal");
-        sideMovement += axisValue * 0.1f;
-        sideMovement = sideMovement < -1.0f ? -1.0f : sideMovement > 1.0f ? 1.0f : sideMovement;
-        if (axisValue == 0.0f)
+
+
+        if (enchantedMovement)
         {
-            sideMovement *= 0.9f;
-            if (sideMovement < 0.001f && sideMovement > -0.001f)
+            float finalSideMovement = sideMovement;
+            sideMovement += axisValue * 0.1f;
+            sideMovement = sideMovement < -1.0f ? -1.0f : sideMovement > 1.0f ? 1.0f : sideMovement;
+            if (axisValue == 0.0f)
             {
-                sideMovement = 0.0f;
+                sideMovement *= 0.9f;
+                if (sideMovement < 0.001f && sideMovement > -0.001f)
+                {
+                    sideMovement = 0.0f;
+                }
             }
+            if (!Grounded)
+            {
+                finalSideMovement *= .5f;
+            }
+
+            transform.rotation = Quaternion.Euler(new Vector3(0, finalSideMovement * SideSpeed * 3f, 0));//-finalSideMovement * SideSpeed
+
+            transform.position += transform.forward * ForwardSpeed * Time.fixedDeltaTime;
         }
-
-        float finalSideMovement = sideMovement;
-
-        if (!Grounded){
-            finalSideMovement *= .5f;
+        else
+        {
+            transform.position = new Vector3(
+                transform.position.x + (axisValue * SideSpeed * Time.fixedDeltaTime),
+                transform.position.y,
+                transform.position.z + (ForwardSpeed * Time.fixedDeltaTime)
+            );
         }
-
-        transform.position = new Vector3(
-            transform.position.x + (axisValue * SideSpeed * Time.deltaTime), 
-            transform.position.y, 
-            transform.position.z + (ForwardSpeed * Time.deltaTime)
-        );
-
-        //transform.rotation = Quaternion.Euler(new Vector3(0, finalSideMovement * SideSpeed, -finalSideMovement * SideSpeed));
-
+        
         if (Grounded && Input.GetButtonDown("Jump")) {
             Grounded = false;
             GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0));

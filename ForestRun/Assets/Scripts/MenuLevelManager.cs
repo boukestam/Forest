@@ -3,31 +3,38 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MenuLevelManager : MonoBehaviour
 {
 
-    [System.Serializable]
+    /*[System.Serializable]
     public class Level
     {
         public int levelNumber;
         public int unlocked;
         public bool isInteractable;
-    }
+    }*/
 
     public GameObject levelButtonTemplate;
     public Transform spacer;
-    public List<Level> levelList;
+    //public List<Level> levelList;
 
     // Use this for initialization
     void Start()
-    {
+    {        
         FillList();
     }
 
     void FillList()
     {
-        foreach (var level in levelList)
+        LevelController.LoadLevels();
+        foreach (Button child in spacer)
+        {
+            Destroy(child);
+        }
+
+        foreach (var level in LevelManager.levels)
         {
             GameObject levelButton = Instantiate(levelButtonTemplate) as GameObject;
             LevelButton button = levelButton.GetComponent<LevelButton>();
@@ -36,7 +43,7 @@ public class MenuLevelManager : MonoBehaviour
 
             if (PlayerPrefs.GetInt("Level" + level.levelNumber) == 1)
             {
-                level.unlocked = 1;
+                level.unlocked = true;
                 level.isInteractable = true;
             }
 
@@ -56,7 +63,7 @@ public class MenuLevelManager : MonoBehaviour
             }
             else if (score > 100)
             {
-                button.star2.SetActive(true);
+                button.star3.SetActive(true);
             }
 
             levelButton.transform.SetParent(spacer, false);
@@ -67,22 +74,31 @@ public class MenuLevelManager : MonoBehaviour
 
     void SaveAll()
     {
-        //if (!PlayerPrefs.HasKey("Level1"))
         GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
         foreach (var levelButton in allLevelButtons)
         {
             LevelButton button = levelButton.GetComponent<LevelButton>();
-            PlayerPrefs.SetInt("Level" + button.LevelText.text, button.unlocked);
+            if (button.unlocked)
+            {
+                PlayerPrefs.SetInt("Level" + button.LevelText.text, 1);
+            }
         }
     }
 
-    void DeleteAll()
+    public void DeleteAll()
     {
         PlayerPrefs.DeleteAll();
+        FillList();
     }
 
     void LoadLevel(int levelNumber)
     {
-        //TODO LOAD LEVEL CORESPONDING TO levelNumber
+        PlayerPrefs.SetInt("lastPlayedLevel", levelNumber);
+        SceneManager.LoadSceneAsync("Main", LoadSceneMode.Additive);
+        Scene nextScene = SceneManager.GetSceneByName("Main");
+        if (nextScene.IsValid())
+        {
+            SceneManager.LoadScene(nextScene.buildIndex);
+        }
     }
 }

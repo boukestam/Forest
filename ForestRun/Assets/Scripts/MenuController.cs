@@ -15,7 +15,6 @@ public class MenuController : MonoBehaviour {
 
     private bool loadLock = false;
     string nextSceneName;
-    AsyncOperation async;
 
     private GameObject Player;
     private GameObject Dog;
@@ -34,7 +33,7 @@ public class MenuController : MonoBehaviour {
         if (!loadLock)
         {
             nextSceneName = sceneName;
-            async = SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Additive);
+            AsyncOperation async = SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Additive);
             Scene nextScene = SceneManager.GetSceneByName(nextSceneName);
             if (nextScene.IsValid())
             {
