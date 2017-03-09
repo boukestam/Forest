@@ -105,6 +105,10 @@ public class Chunk {
         }
     }
 
+    public List<GameObject> GetSpawned() {
+        return Spawned;
+    }
+
     public void RemoveChunk() {
         for (int i = Spawned.Count - 1; i >= 0; i--) {
             UnityEngine.Object.DestroyImmediate(Spawned[i]);

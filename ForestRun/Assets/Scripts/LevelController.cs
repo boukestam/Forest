@@ -127,10 +127,55 @@ public class Level {
         chunks.RemoveAt(index);
     }
 
+    private List<Vector3> GetPath(float startZ, float endZ, float pathLength, float pathWidth, float pathStepSize) {
+        List<Vector3> path = new List<Vector3>();
+
+        for (float z = this.StartZ; z < this.EndZ; z += pathStepSize) {
+            Vector3 pathPoint = new Vector3(Mathf.Sin(z / pathLength) * pathWidth, 0, z);
+            path.Add(pathPoint);
+        }
+
+        return path;
+    }
+
     private void spawnChunk(float chunkZ) {
+        // For testing
+        GameObject pathBlueprint = (GameObject)Resources.Load("Path");
+
         if (this.EndZ > chunkZ + ChunkLength) { // Prevent new chunk spawning past the map.
             if (this.StartZ <= chunkZ) { // Prevent new chunk spawning before the map.
-                chunks.Add(new Chunk(Template, new Rect(-ChunkWidthRadius, chunkZ, ChunkWidthRadius * 2, ChunkLength)));
+                Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkZ, ChunkWidthRadius * 2, ChunkLength));
+
+                // Clear path in chunk
+
+                List<Vector3> path = GetPath(this.StartZ, this.EndZ, 20, 10, 1);
+
+                float clearRadius = 2;
+
+                List<GameObject> spawned = newChunk.GetSpawned();
+
+                for(int i = 0; i < spawned.Count; i++) {
+                    GameObject obj = spawned[i];
+
+                    if (obj.tag != "Ground") {
+                        foreach (Vector3 pathPoint in path) {
+                            if ((obj.transform.position - pathPoint).magnitude < clearRadius) {
+                                SpawnController.Destroy(obj);
+                                spawned.RemoveAt(i);
+                                i--;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                foreach (Vector3 pathPoint in path) {
+                    if(newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
+                        spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.1f, pathPoint.z), new Quaternion()));
+                    }
+                }
+
+                chunks.Add(newChunk);
             }
         }
     }
