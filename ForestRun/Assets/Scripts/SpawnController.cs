@@ -4,37 +4,42 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpawnController : MonoBehaviour {
-    public static void spawnTreeFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnTreeFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
 
     }
-    public static void spawnFenceFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnFenceFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
     }
-    public static void spawnGrassFunc(SpawnableGameObject self, Vector3 pos, List<GameObject> Spawned) {
+    public static void spawnGrassFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
     }
-    public static void spawnPlaneFunc(ChunkTemplate template, Rect spawnArea, List<GameObject> Spawned) {
-        GameObject obj = Instantiate(template.Plane, new Vector3(spawnArea.center.x, 0, spawnArea.center.y), Quaternion.identity);
-        obj.transform.localScale = new Vector3(spawnArea.width / 10, 1, spawnArea.height / 10);
-        Spawned.Add(obj);
-        obj.transform.parent = template.PlaneParent.transform;
+    public static void spawnPlaneFunc(Chunk chunk, GameObject plane, Vector3 offset) {
+        GameObject obj = Instantiate(plane, offset+new Vector3(chunk.SpawnArea.center.x, 0, chunk.SpawnArea.y), Quaternion.identity);
+        obj.transform.localScale = new Vector3(chunk.SpawnArea.width / 10, 1, chunk.SpawnArea.height / 10);
+        chunk.Spawned.Add(obj);
+        obj.transform.parent = chunk.chunkTemplate.PlaneParent.transform;
+    }
+    public static void spawnItem(Chunk chunk, GameObject item, Vector3 offset) {
+        GameObject obj = Instantiate(item, offset + new Vector3(0, 0, chunk.SpawnArea.y), Quaternion.identity);
+        chunk.Spawned.Add(obj);
+        //obj.transform.parent = chunk.chunkTemplate.PlaneParent.transform;
     }
 }
 
-public class SpawnableGameObject {
+public class SpawnableDensityObject {
     public GameObject ParentObject;
     public GameObject Resource;
     public string resourceName;
-    public Action<SpawnableGameObject, Vector3, List<GameObject>> SpawnFunc;
+    public Action<SpawnableDensityObject, Vector3, List<GameObject>> SpawnFunc;
 
-    public SpawnableGameObject(string newResourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc) {
+    public SpawnableDensityObject(string newResourceName, Action<SpawnableDensityObject, Vector3, List<GameObject>> newSpawnFunc) {
         ParentObject = new GameObject();
         ParentObject.name = newResourceName;
         this.Resource = (GameObject)Resources.Load(newResourceName);
@@ -43,10 +48,10 @@ public class SpawnableGameObject {
     }
 }
 
-public class SpawnableGroup : SpawnableGameObject {
+public class SpawnableGroup : SpawnableDensityObject {
     public Func<float> Density;
 
-    public SpawnableGroup(string resourceName, Action<SpawnableGameObject, Vector3, List<GameObject>> newSpawnFunc, Func<float> newDensity) : base(resourceName, newSpawnFunc) {
+    public SpawnableGroup(string resourceName, Action<SpawnableDensityObject, Vector3, List<GameObject>> newSpawnFunc, Func<float> newDensity) : base(resourceName, newSpawnFunc) {
         this.Density = newDensity;
     }
 }
@@ -79,16 +84,19 @@ public class ChunkTemplate {
 public class Chunk {
     private static System.Random rand = new System.Random();
     private float SpawnCount;
+
+    public ChunkTemplate chunkTemplate;
     public Rect SpawnArea;
 
-    private List<GameObject> Spawned = new List<GameObject>();
+    public List<GameObject> Spawned = new List<GameObject>();
 
-    public Chunk(ChunkTemplate chunkTemplate, Rect newSpawnArea) {
+    public Chunk(ChunkTemplate newChunkTemplate, Rect newSpawnArea) {
+        this.chunkTemplate = newChunkTemplate;
         SpawnArea = newSpawnArea;
         float spawnSurface = SpawnArea.width * SpawnArea.height;
         SpawnCount = spawnSurface * chunkTemplate.TotalDensity;
-
-        SpawnController.spawnPlaneFunc(chunkTemplate, newSpawnArea, Spawned);
+        
+        SpawnController.spawnPlaneFunc(this, newChunkTemplate.Plane, new Vector3());
 
         for (int i = 0; i < SpawnCount; i++) {
             Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(SpawnArea.xMin, SpawnArea.xMax), 0, UnityEngine.Random.Range(SpawnArea.yMin, SpawnArea.yMax));
