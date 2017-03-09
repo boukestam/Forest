@@ -213,12 +213,12 @@ public class Level {
                 }
 
                 // Add coins to the chunk.
-                float chunkStartRelativeZ = chunkStartZ - this.StartZ;
+                //float chunkStartRelativeZ = chunkStartZ - this.StartZ;
                 for (int i = 0; i < path.Count; i++) {
-                    Vector3 coinLocation = path[i];
-                    if (coinLocation.z > chunkStartRelativeZ && coinLocation.z <= chunkStartRelativeZ + ChunkLength) {
-                        coinLocation.z -= chunkStartRelativeZ;
-                        SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), coinLocation);
+                    Vector3 boneLocation = path[i];
+                    if (boneLocation.z > chunkStartZ && boneLocation.z <= chunkStartZ + ChunkLength) {
+                        boneLocation.z -= chunkStartZ;
+                        SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
                     }
 
                 }
