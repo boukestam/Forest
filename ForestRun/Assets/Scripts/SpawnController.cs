@@ -21,7 +21,7 @@ public class SpawnController : MonoBehaviour {
         obj.transform.parent = self.ParentObject.transform;
     }
     public static void spawnPlaneFunc(Chunk chunk, GameObject plane, Vector3 offset) {
-        GameObject obj = Instantiate(plane, offset+new Vector3(chunk.SpawnArea.center.x, 0, chunk.SpawnArea.y), Quaternion.identity);
+        GameObject obj = Instantiate(plane, offset+new Vector3(chunk.SpawnArea.center.x, 0, chunk.SpawnArea.center.y), Quaternion.identity);
         obj.transform.localScale = new Vector3(chunk.SpawnArea.width / 10, 1, chunk.SpawnArea.height / 10);
         chunk.Spawned.Add(obj);
         obj.transform.parent = chunk.chunkTemplate.PlaneParent.transform;

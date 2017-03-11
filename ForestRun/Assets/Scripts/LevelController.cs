@@ -26,8 +26,8 @@ public class LevelController : MonoBehaviour {
         }, (GameObject)Resources.Load("GrassPlane"));
 
         levelManager = new LevelManager(new List<Level>() {
-            new Level(forestChunkTemplate, 0, 100, 80),
-            new Level(forestChunkTemplate2, 100, 1000, 80)
+            new Level(forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80),
+            new Level(forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80)
         });
 
         RestartCurrentLevel();
@@ -86,7 +86,7 @@ public class LevelManager {
             }
         } else {
             // Check for going to new level.
-            if (levels[currentLevel].completedLevel()) {
+            if (levels[currentLevel].CompletedLevel()) {
                 EnterScorePanel();
             }
 
@@ -107,29 +107,38 @@ public class LevelManager {
 }
 
 public class Level {
-    private GameObject Player;
     private static float StartDespawnZ = -10;
     private static float MinimumRenderDistanceZ = 80;
     private static float ChunkLength = 2;
+
+    private GameObject Player;
     private ChunkTemplate Template;
+    private GameObject edgePrefab;
+    public float furdestPlacedEdge=0;
     public float StartZ;
     private float EndZ;
     private float ChunkWidthRadius;
 
+    GameObject rememberEdgeLeft = null;
+    GameObject rememberEdgeRight = null;
+
     private List<Chunk> chunks = new List<Chunk>();
 
-    public Level(ChunkTemplate template, float startZ, float endZ, float chunkWidthRadius) {
+    public Level(ChunkTemplate template, GameObject newEdgePrefab, float startZ, float endZ, float chunkWidthRadius) {
         Player = GameObject.FindWithTag("Player");
         this.Template = template;
+        this.edgePrefab = newEdgePrefab;
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+        
+        this.furdestPlacedEdge = StartZ;
     }
 
     public void Update() {
         // Delete chucks that are out of the screen.
         if (chunks.Count > 0 && chunks[0].SpawnArea.yMax - Player.transform.position.z < StartDespawnZ) {
-            removeChunk(0);
+            RemoveChunk(0);
         }
 
         // Add chunks when close enough to the edge of all chunks.
@@ -139,8 +148,8 @@ public class Level {
         }
     }
 
-    public bool completedLevel() {
-        return Player.transform.position.z + ChunkLength >= this.EndZ;
+    public bool CompletedLevel() {
+        return Player.transform.position.z >= this.EndZ;
     }
 
     public void ResetLevel() {
@@ -155,11 +164,14 @@ public class Level {
 
     public void ClearLevel() {
         for (int i = chunks.Count - 1; i >= 0; i--) {
-            this.removeChunk(i);
+            this.RemoveChunk(i);
         }
+        SpawnController.Destroy(rememberEdgeLeft);
+        SpawnController.Destroy(rememberEdgeRight);
+        this.furdestPlacedEdge = StartZ;
     }
 
-    private void removeChunk(int index) {
+    private void RemoveChunk(int index) {
         chunks[index].RemoveChunk();
         chunks.RemoveAt(index);
     }
@@ -220,7 +232,7 @@ public class Level {
                         if (Random.Range(0.0f, 1.0f) > 0.9f) {
                             boneLocation.z -= chunkStartZ;
                             if (Random.Range(0.0f, 1.0f) >= 0.5f) {
-                                boneLocation.x += Random.Range(1, 2);
+                                boneLocation.x += Random.Range(0.0f, 1.0f) <= 0.5f ? Random.Range(-1.0f, -2.0f) : Random.Range(1.0f, 2.0f);
                             }
                             SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
                         }
@@ -231,6 +243,21 @@ public class Level {
                 // If last chunk add finish plane.
                 if (chunkStartZ + ChunkLength == this.EndZ) {
                     SpawnController.spawnPlaneFunc(newChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
+                }
+
+                // Add edge objects to the map.
+                if (furdestPlacedEdge < chunkStartZ) {
+                    // Add edges to the the chunk in just passed the last location of the edge.
+                    if(rememberEdgeLeft != null && rememberEdgeRight != null) {
+                        newChunk.Spawned.Add(rememberEdgeLeft);
+                        newChunk.Spawned.Add(rememberEdgeRight);
+                    }
+                    float edgeWidthRadius = edgePrefab.GetComponent<Renderer>().bounds.size.x / 2;
+                    float edgeLength = edgePrefab.GetComponent<Renderer>().bounds.size.z;
+                    float offsetZ = edgeLength / 2;
+                    rememberEdgeLeft = SpawnController.Instantiate(edgePrefab, new Vector3(-ChunkWidthRadius - edgeWidthRadius, 0, furdestPlacedEdge + offsetZ), Quaternion.identity);
+                    rememberEdgeRight = SpawnController.Instantiate(edgePrefab, new Vector3(ChunkWidthRadius + edgeWidthRadius, 0, furdestPlacedEdge + offsetZ), Quaternion.identity);
+                    furdestPlacedEdge += edgeLength;
                 }
 
                 chunks.Add(newChunk);
