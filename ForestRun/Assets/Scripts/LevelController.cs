@@ -77,6 +77,7 @@ public class LevelManager {
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
+        playerController.gameObject.transform.position = new Vector3(0, playerController.gameObject.transform.position.y, playerController.gameObject.transform.position.z);
     }
 
     public void Update() {
@@ -118,12 +119,15 @@ public class Level {
 
     private List<Chunk> chunks = new List<Chunk>();
 
+    private int Seed;
+
     public Level(ChunkTemplate template, float startZ, float endZ, float chunkWidthRadius) {
         Player = GameObject.FindWithTag("Player");
         this.Template = template;
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+        this.Seed = Random.Range(0, 1000000);
     }
 
     public void Update() {
@@ -164,12 +168,28 @@ public class Level {
         chunks.RemoveAt(index);
     }
     
-    private List<Vector3> GetPath(float startZ, float endZ, float pathLength, float pathWidth, float pathStepSize) {
+    private List<Vector3> GetPath(float startZ, float endZ, float randomness, float pathStepSize) {
         List<Vector3> path = new List<Vector3>();
+        float x = 0;
+        float deltaX = 0;
 
-        for (float z = this.StartZ; z < this.EndZ; z += pathStepSize) {
-            Vector3 pathPoint = new Vector3(Mathf.Sin(z / pathLength) * pathWidth, 0, z);
+        float maxDeltaX = 0.5f;
+
+        Random.InitState(this.Seed + (int)(startZ * 100));
+
+        for (float z = startZ; z < endZ; z += pathStepSize) {
+            // Vector3 pathPoint = new Vector3((Mathf.Sin(z / pathLength) + Mathf.Sin(z / (pathLength / 4))) * pathWidth, 0, z);
+
+            Vector3 pathPoint = new Vector3(x, 0, z);
             path.Add(pathPoint);
+            deltaX += Random.Range(-randomness, randomness);
+            if(deltaX > maxDeltaX) {
+                deltaX = maxDeltaX;
+            }
+            if (deltaX < -maxDeltaX) {
+                deltaX = -maxDeltaX;
+            }
+            x += deltaX;
         }
 
         return path;
@@ -185,7 +205,7 @@ public class Level {
 
                 // Clear path in chunk
 
-                List<Vector3> path = GetPath(this.StartZ, this.EndZ, 20, 10, 1);
+                List<Vector3> path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
 
                 float clearRadius = 2;
 
@@ -203,12 +223,6 @@ public class Level {
                                 break;
                             }
                         }
-                    }
-                }
-
-                foreach (Vector3 pathPoint in path) {
-                    if(newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
-                        spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.1f, pathPoint.z), new Quaternion()));
                     }
                 }
 
