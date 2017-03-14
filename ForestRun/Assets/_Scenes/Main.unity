@@ -412,6 +412,7 @@ MonoBehaviour:
   SideSpeed: 10
   JumpForce: 600
   RunAnimationSpeed: 3
+  enchantedMovement: 1
 --- !u!54 &702161522
 Rigidbody:
   m_ObjectHideFlags: 0

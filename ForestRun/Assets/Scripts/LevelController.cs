@@ -7,6 +7,18 @@ public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
 
     void Start() {
+        levelManager = new LevelManager();
+        LoadLevels();
+
+        RestartCurrentLevel();
+    }
+
+    void Update() {
+        levelManager.Update();
+    }
+
+    public static void LoadLevels()
+    {
         const float forestTreeDensity = 0.01f;
         const float forestFenceDensity = 0.004f;
         const float forestGrassDensity = 0.05f;
@@ -24,39 +36,42 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity2),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
         }, (GameObject)Resources.Load("GrassPlane"));
+        
+        LevelManager.levels = new List<Level>();
+        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80, true));
+        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80));
 
-        levelManager = new LevelManager(new List<Level>() {
-            new Level(forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80),
-            new Level(forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80)
-        });
+        /*levelManager = new LevelManager(new List<Level>() {
+            new Level(1, forestChunkTemplate, 0, 100, 80, true),
+            new Level(2, forestChunkTemplate2, 100, 1000, 80)
+        });*/
 
-        RestartCurrentLevel();
-    }
-
-    void Update() {
-        levelManager.Update();
     }
 
     public void RestartCurrentLevel() {
         levelManager.RestartCurrentLevel();
     }
 }
-
+[System.Serializable]
 public class LevelManager {
-    List<Level> levels;
-    private int currentLevel = 0;
+    public static List<Level> levels;
+    private int currentLevel;
     private GameObject scorePanel;
     private PlayerController playerController;
     bool scoreMenu = false;
 
-    public LevelManager(List<Level> newLevels) {
-        this.levels = newLevels;
+    public LevelManager() {
         scorePanel = GameObject.Find("ScorePanel");
         scorePanel.SetActive(false);
         playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        currentLevel = PlayerPrefs.GetInt("lastPlayedLevel") - 1;
     }
 
     private void EnterScorePanel() {
+        if (playerController.getPoints() > PlayerPrefs.GetInt("Level" + (currentLevel + 1) + "_score"))
+        {
+            PlayerPrefs.SetInt("Level" + (currentLevel + 1) + "_score", playerController.getPoints());
+        }
         scoreMenu = true;
         scorePanel.SetActive(true);
         scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: "+ playerController.getPoints();
@@ -69,11 +84,15 @@ public class LevelManager {
         playerController.Unfreeze();
     }
 
-    private void NextLevel() {
+    private void NextLevel()
+    {
         playerController.setPoints(0);
         ExitScorePanel();
         levels[currentLevel].ClearLevel();
         currentLevel++;
+        //Unlock new level and save this level as last level
+        PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 1);
+        PlayerPrefs.SetInt("Level" + (currentLevel + 1), 1);
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
@@ -107,7 +126,12 @@ public class LevelManager {
     }
 }
 
+[System.Serializable]
 public class Level {
+    public int levelNumber;
+    public bool unlocked;
+    public bool isInteractable;
+
     private static float StartDespawnZ = -10;
     private static float MinimumRenderDistanceZ = 80;
     private static float ChunkLength = 2;
@@ -126,14 +150,23 @@ public class Level {
     private List<Chunk> chunks = new List<Chunk>();
     
     private int Seed;
-
-    public Level(ChunkTemplate template, GameObject newEdgePrefab, float startZ, float endZ, float chunkWidthRadius) {
+    
+    public Level(int number, ChunkTemplate template, GameObject newEdgePrefab, float startZ, float endZ, float chunkWidthRadius, bool unlocked = false) {
         Player = GameObject.FindWithTag("Player");
+        this.levelNumber = number;
         this.Template = template;
         this.edgePrefab = newEdgePrefab;
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+        this.unlocked = unlocked;
+        this.isInteractable = unlocked;
+
+        /*// Temporary faking a straight item path
+        float length = 10;
+        for (int i = 1; i < 20; i++) {
+            itemPath.Add(new Vector3(0,0, length*i));
+        }*/
         this.Seed = Random.Range(0, 1000000);
         this.furdestPlacedEdge = StartZ;
     }
@@ -234,6 +267,12 @@ public class Level {
                                 break;
                             }
                         }
+                    }
+                }
+
+                foreach (Vector3 pathPoint in path) {
+                    if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
+                        spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
                     }
                 }
 
