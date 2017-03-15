@@ -52,17 +52,13 @@ public class MenuLevelManager : MonoBehaviour
             buttonBase.onClick.AddListener(() => LoadLevel(level.levelNumber));
 
             int score = PlayerPrefs.GetInt("Level" + level.levelNumber + "_score");
-
-            if (score > 0)
-            {
+            if (score > level.amountOfBones/10) {
                 button.star1.SetActive(true);
             }
-            else if (score > 10)
-            {
+            if (score > level.amountOfBones/2) {
                 button.star2.SetActive(true);
             }
-            else if (score > 100)
-            {
+            if (score >= level.amountOfBones) {
                 button.star3.SetActive(true);
             }
 
