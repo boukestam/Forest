@@ -260,7 +260,7 @@ public class Level {
         float offPathMaximumX = 2.0f;
         float maxRandomDisplacementZ = stepSize / 3.0f;
 
-        float lastBoneLocationZ = this.StartZ - stepSize;
+        float lastBoneLocationZ = this.StartZ - stepSize+ offsetStartBoneSpawnZ;
         for (int i = 0; i < newPath.Count; i++) {
             if (newPath[i].z > this.EndZ) {
                 break;
@@ -277,6 +277,7 @@ public class Level {
                 bones.Add(boneLocation);
             }
         }
+        Debug.Log(bones.Count);
     }
 
     public void Update() {
