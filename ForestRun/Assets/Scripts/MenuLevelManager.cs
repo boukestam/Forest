@@ -68,7 +68,7 @@ public class MenuLevelManager : MonoBehaviour {
         GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
         foreach (var levelButton in allLevelButtons) {
             LevelButton button = levelButton.GetComponent<LevelButton>();
-            if (button.unlocked) {
+            if (LevelManager.levels[int.Parse(button.LevelText.text) - 1].unlocked) {
                 PlayerPrefs.SetInt("Level" + button.LevelText.text, 1);
             }
         }

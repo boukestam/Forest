@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
-    private static bool levelLoaded = false;
 
     void Start() {
         levelManager = new LevelManager();
@@ -18,7 +17,6 @@ public class LevelController : MonoBehaviour {
     }
     
     public static void LoadLevels() {
-        levelLoaded = true;
         const float cloudDensity = 0.004f;
 
         ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
@@ -109,6 +107,8 @@ public class LevelManager {
     private void EnterScorePanel() {
         if (playerController.getPoints() > PlayerPrefs.GetInt("Level" + (currentLevel + 1) + "_score")) {
             PlayerPrefs.SetInt("Level" + (currentLevel + 1) + "_score", playerController.getPoints());
+            PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 2);
+            PlayerPrefs.SetInt("Level" + (currentLevel + 2), 1);
         }
         scoreMenu = true;
         scorePanel.SetActive(true);
@@ -146,9 +146,6 @@ public class LevelManager {
         levels[currentLevel].ClearLevel();
         currentLevel++;
         //Unlock new level and save this level as last level
-        PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 1);
-        PlayerPrefs.SetInt("Level" + (currentLevel + 1), 1);
-        PlayerPrefs.Save();
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
