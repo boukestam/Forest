@@ -100,24 +100,6 @@ public class PlayerController : MonoBehaviour {
         
         if (enchantedMovement)
         {
-            /*float finalSideMovement = sideMovement;
-            sideMovement += axisValue * 0.1f;
-            sideMovement = sideMovement < -1.0f ? -1.0f : sideMovement > 1.0f ? 1.0f : sideMovement;
-            if (axisValue == 0.0f)
-            {
-                sideMovement *= 0.9f;
-                if (sideMovement < 0.001f && sideMovement > -0.001f)
-                {
-                    sideMovement = 0.0f;
-                }
-            }
-            if (!Grounded)
-            {
-                finalSideMovement *= .5f;
-            }
-            
-            transform.Rotate(new Vector3(0, finalSideMovement * SideSpeed * 3f, 0));*/
-
             float runningAngleAddition = 0f;
             
             if (axisValue <= -1f)

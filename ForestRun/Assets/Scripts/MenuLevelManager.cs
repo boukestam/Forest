@@ -1,48 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class MenuLevelManager : MonoBehaviour
-{
-
-    /*[System.Serializable]
-    public class Level
-    {
-        public int levelNumber;
-        public int unlocked;
-        public bool isInteractable;
-    }*/
-
+public class MenuLevelManager : MonoBehaviour {
     public GameObject levelButtonTemplate;
     public Transform spacer;
-    //public List<Level> levelList;
 
-    // Use this for initialization
-    void Start()
-    {        
+    void Start() {
         FillList();
     }
 
-    void FillList()
-    {
+    public void FillList() {
         LevelController.LoadLevels();
-        foreach (Button child in spacer)
-        {
-            Destroy(child);
-        }
-
-        foreach (var level in LevelManager.levels)
-        {
+        foreach (var level in LevelManager.levels) {
             GameObject levelButton = Instantiate(levelButtonTemplate) as GameObject;
             LevelButton button = levelButton.GetComponent<LevelButton>();
             Button buttonBase = button.GetComponent<Button>();
             button.LevelText.text = level.levelNumber + "";
 
-            if (PlayerPrefs.GetInt("Level" + level.levelNumber) == 1)
-            {
+            if (PlayerPrefs.GetInt("Level" + level.levelNumber) == 1) {
+
                 level.unlocked = true;
                 level.isInteractable = true;
             }
@@ -52,48 +29,67 @@ public class MenuLevelManager : MonoBehaviour
             buttonBase.onClick.AddListener(() => LoadLevel(level.levelNumber));
 
             int score = PlayerPrefs.GetInt("Level" + level.levelNumber + "_score");
-            if (score > level.amountOfBones/10) {
+            if (score > level.amountOfBones / 10) {
                 button.star1.SetActive(true);
             }
-            if (score > level.amountOfBones/2) {
+            if (score > level.amountOfBones / 2) {
                 button.star2.SetActive(true);
             }
             if (score >= level.amountOfBones) {
                 button.star3.SetActive(true);
             }
-
-            levelButton.transform.SetParent(spacer, false);
+            levelButton.transform.SetParent(spacer.transform, false);
         }
-
         SaveAll();
     }
 
-    void SaveAll()
-    {
+    private void Update() {
         GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
-        foreach (var levelButton in allLevelButtons)
-        {
+        foreach (var levelButton in allLevelButtons) {
             LevelButton button = levelButton.GetComponent<LevelButton>();
-            if (button.unlocked)
-            {
-                PlayerPrefs.SetInt("Level" + button.LevelText.text, 1);
-            }
+            Button buttonBase = button.GetComponent<Button>();
+            int levelnumber = int.Parse(button.LevelText.text);
+
+            if (PlayerPrefs.GetInt("Level" + levelnumber) == 1) {
+                
+                button.unlocked = true;
+                buttonBase.interactable = true;
+            } else {
+
+                button.unlocked = false;
+                buttonBase.interactable = false;
+            }            
         }
     }
 
-    public void DeleteAll()
-    {
+    void SaveAll() {
+        GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
+        foreach (var levelButton in allLevelButtons) {
+            LevelButton button = levelButton.GetComponent<LevelButton>();
+            if (button.unlocked) {
+                PlayerPrefs.SetInt("Level" + button.LevelText.text, 1);
+            }
+        }
+        PlayerPrefs.Save();
+    }
+
+    public void DeleteAll() {
         PlayerPrefs.DeleteAll();
+        DeleteButtons();
         FillList();
     }
 
-    void LoadLevel(int levelNumber)
-    {
+    void DeleteButtons() {
+        foreach (Transform child in spacer) {
+            Destroy(child.gameObject);
+        }
+    }
+
+    void LoadLevel(int levelNumber) {
         PlayerPrefs.SetInt("lastPlayedLevel", levelNumber);
         SceneManager.LoadSceneAsync("Main", LoadSceneMode.Additive);
         Scene nextScene = SceneManager.GetSceneByName("Main");
-        if (nextScene.IsValid())
-        {
+        if (nextScene.IsValid()) {
             SceneManager.LoadScene(nextScene.buildIndex);
         }
     }
