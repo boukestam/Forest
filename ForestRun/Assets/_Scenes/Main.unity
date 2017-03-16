@@ -750,7 +750,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ForwardSpeed: 10
   SideSpeed: 10
-  JumpForce: 600
+  JumpVelocity: 12.5
+  JumpForce: 12.5
   RunAnimationSpeed: 3
   enchantedMovement: 1
   maxRotation: 45

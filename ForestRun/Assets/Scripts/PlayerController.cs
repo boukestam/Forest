@@ -77,7 +77,9 @@ public class PlayerController : MonoBehaviour {
 
     void OnCollisionEnter(Collision collision) {
         if(collision.collider.tag == "Ground") {
-            Grounded = true;
+            if (GetComponent<Rigidbody>().velocity.y <= 0) {
+                Grounded = true;
+            }
         } else if(collision.collider.tag == "Item") {
             Destroy(collision.collider.gameObject);
             addPoints(1);
@@ -86,7 +88,22 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-	void FixedUpdate () {
+    private void Update() {
+        if (Dead) {
+            if (Input.GetButtonDown("Restart")) {
+                Restart();
+            }
+        }
+        if (FreezeBool) {
+            return;
+        }
+        if (Grounded && Input.GetButtonDown("Jump")) {
+            GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
+            Grounded = false;
+        }
+    }
+
+    void FixedUpdate () {
         if (Dead) {
             if (Input.GetButtonDown("Restart")) {
                 Restart();
@@ -143,11 +160,6 @@ public class PlayerController : MonoBehaviour {
             );
         }
         
-        if (Grounded && Input.GetButtonDown("Jump")) {
-            Grounded = false;
-            GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0));
-        }
-
         Score.GetComponent<Text>().text = (points).ToString();
 	}
 }
