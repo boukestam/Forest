@@ -38,8 +38,8 @@ public class LevelController : MonoBehaviour {
         }, (GameObject)Resources.Load("GrassPlane"));
         
         LevelManager.levels = new List<Level>();
-        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80, true));
-        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80));
+        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80, 60, true));
+        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80, 60));
 
         /*levelManager = new LevelManager(new List<Level>() {
             new Level(1, forestChunkTemplate, 0, 100, 80, true),
@@ -52,6 +52,7 @@ public class LevelController : MonoBehaviour {
         levelManager.RestartCurrentLevel();
     }
 }
+
 [System.Serializable]
 public class LevelManager {
     public static List<Level> levels;
@@ -141,6 +142,7 @@ public class Level {
     private GameObject edgePrefab;
     public float furdestPlacedEdge=0;
     public float StartZ;
+    public float amountOfBones;
     private float EndZ;
     private float ChunkWidthRadius;
 
@@ -148,10 +150,12 @@ public class Level {
     GameObject rememberEdgeRight = null;
 
     private List<Chunk> chunks = new List<Chunk>();
-    
+    List<Vector3> path = new List<Vector3>();
+    List<Vector3> bones = new List<Vector3>();
+
     private int Seed;
     
-    public Level(int number, ChunkTemplate template, GameObject newEdgePrefab, float startZ, float endZ, float chunkWidthRadius, bool unlocked = false) {
+    public Level(int number, ChunkTemplate template, GameObject newEdgePrefab, float startZ, float endZ, float chunkWidthRadius, int newAmountOfBones, bool unlocked = false) {
         Player = GameObject.FindWithTag("Player");
         this.levelNumber = number;
         this.Template = template;
@@ -159,6 +163,7 @@ public class Level {
         this.StartZ = startZ;
         this.EndZ = endZ;
         this.ChunkWidthRadius = chunkWidthRadius;
+        this.amountOfBones = newAmountOfBones;
         this.unlocked = unlocked;
         this.isInteractable = unlocked;
 
@@ -169,6 +174,41 @@ public class Level {
         }*/
         this.Seed = Random.Range(0, 1000000);
         this.furdestPlacedEdge = StartZ;
+
+        path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
+        GenerateBoneLocations(path);
+    }
+
+    private void GenerateBoneLocations(List<Vector3> newPath) {
+        bones.Clear();
+        Random.InitState(System.DateTime.Now.Millisecond);
+
+        float stepSize = (this.EndZ-this.StartZ)/this.amountOfBones;
+
+        // Tweakable variables
+        float percentageChangeOffPath = 0.5f;
+        float offPathMinimumX = 1.0f;
+        float offPathMaximumX = 2.0f;
+        float maxRandomDisplacementZ = stepSize/3.0f;
+
+        float lastBoneLocationZ = this.StartZ - stepSize;
+        for (int i = 0; i < newPath.Count; i++) {
+            if(newPath[i].z > this.EndZ) {
+                break;
+            }
+            if (newPath[i].z > lastBoneLocationZ + stepSize) {
+                lastBoneLocationZ += stepSize;
+                Vector3 boneLocation = new Vector3(newPath[i].x, newPath[i].y, newPath[i].z);
+                 float negativeRange = (bones.Count > 0) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
+                 float possitiveRange = (bones.Count < this.amountOfBones - 2) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
+                 boneLocation.z += Random.Range(-negativeRange, possitiveRange);
+                if (Random.Range(0.0f, 1.0f) < percentageChangeOffPath) {
+                    boneLocation.x += Random.Range(0.0f, 1.0f) >= 0.5f ? Random.Range(-offPathMinimumX, -offPathMaximumX) : Random.Range(offPathMinimumX, offPathMaximumX);
+                }
+                bones.Add(boneLocation);
+            }
+        }
+        Debug.Log(bones.Count);
     }
 
     public void Update() {
@@ -205,6 +245,8 @@ public class Level {
         SpawnController.Destroy(rememberEdgeLeft);
         SpawnController.Destroy(rememberEdgeRight);
         this.furdestPlacedEdge = StartZ;
+        path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
+        GenerateBoneLocations(path);
     }
 
     private void RemoveChunk(int index) {
@@ -247,10 +289,6 @@ public class Level {
             if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
 
-                // Clear path in chunk
-
-                List<Vector3> path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
-
                 float clearRadius = 2;
 
                 List<GameObject> spawned = newChunk.GetSpawned();
@@ -276,18 +314,13 @@ public class Level {
                     }
                 }
 
-                // Add coins to the chunk.
-                //float chunkStartRelativeZ = chunkStartZ - this.StartZ;
-                for (int i = 0; i < path.Count; i++) {
-                    Vector3 boneLocation = path[i];
-                    if (boneLocation.z > chunkStartZ && boneLocation.z <= chunkStartZ + ChunkLength) {
-                        if (Random.Range(0.0f, 1.0f) > 0.9f) {
-                            boneLocation.z -= chunkStartZ;
-                            if (Random.Range(0.0f, 1.0f) >= 0.5f) {
-                                boneLocation.x += Random.Range(0.0f, 1.0f) <= 0.5f ? Random.Range(-1.0f, -2.0f) : Random.Range(1.0f, 2.0f);
-                            }
-                            SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
-                        }
+                // Add bones to the chunk.
+                Random.InitState(System.DateTime.Now.Millisecond);
+                for (int i = 0; i < bones.Count; i++) {
+                    Vector3 boneLocation = new Vector3(bones[i].x, bones[i].y, bones[i].z);
+                    if (boneLocation.z >= chunkStartZ && boneLocation.z <= chunkStartZ+ChunkLength) {
+                        boneLocation.z -= chunkStartZ;
+                        SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
                     }
 
                 }
