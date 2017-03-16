@@ -54,11 +54,12 @@ public class LevelController : MonoBehaviour {
 
         int amountOfBones = 10;
         int levelLength = 100;
+        float levelWidth = 30;
         LevelManager.levels = new List<Level>();
-        Level level1 = new Level(1, snowChunkTemplate1, (GameObject)Resources.Load("Mountain"), 0, levelLength, 80, amountOfBones, true);
-        Level level2 = new Level(2, snowChunkTemplate2, (GameObject)Resources.Load("Mountain"), level1.EndZ, level1.EndZ + levelLength, 80, amountOfBones);
-        Level level3 = new Level(3, forestChunkTemplate1, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, 80, amountOfBones);
-        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level3.EndZ, level3.EndZ + levelLength, 80, amountOfBones);
+        Level level1 = new Level(1, snowChunkTemplate1, (GameObject)Resources.Load("Mountain"), 0, levelLength, levelWidth, amountOfBones, true);
+        Level level2 = new Level(2, snowChunkTemplate2, (GameObject)Resources.Load("Mountain"), level1.EndZ, level1.EndZ + levelLength, levelWidth, amountOfBones);
+        Level level3 = new Level(3, forestChunkTemplate1, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, levelWidth, amountOfBones);
+        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level3.EndZ, level3.EndZ + levelLength, levelWidth, amountOfBones);
         LevelManager.levels.Add(level1);
         LevelManager.levels.Add(level2);
         LevelManager.levels.Add(level3);
@@ -125,7 +126,7 @@ public class LevelManager {
 
     public void Update() {
         if (scoreMenu) {
-            if (Input.GetButtonDown("Submit")) {
+            if (Input.GetButtonDown("Jump")) {
                 NextLevel();
             }
         } else {
@@ -286,17 +287,22 @@ public class Level {
         Random.InitState(this.Seed + (int)(startZ * 100));
 
         for (float z = startZ; z < endZ; z += pathStepSize) {
-            // Vector3 pathPoint = new Vector3((Mathf.Sin(z / pathLength) + Mathf.Sin(z / (pathLength / 4))) * pathWidth, 0, z);
-
             Vector3 pathPoint = new Vector3(x, 0, z);
             path.Add(pathPoint);
+
             deltaX += Random.Range(-randomness, randomness);
+
             if(deltaX > maxDeltaX) {
                 deltaX = maxDeltaX;
             }
             if (deltaX < -maxDeltaX) {
                 deltaX = -maxDeltaX;
             }
+
+            if(Mathf.Abs(x + (deltaX * 10)) > this.ChunkWidthRadius) {
+                deltaX *= 0.5f;
+            }
+
             x += deltaX;
         }
 
@@ -330,11 +336,13 @@ public class Level {
                     }
                 }
 
+                /*
                 foreach (Vector3 pathPoint in path) {
                     if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
                         spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
                     }
                 }
+                */
 
                 // Add bones to the chunk.
                 Random.InitState(System.DateTime.Now.Millisecond);
