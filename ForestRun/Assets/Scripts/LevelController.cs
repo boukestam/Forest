@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
+    private static bool levelLoaded = false;
 
     void Start() {
         levelManager = new LevelManager();
@@ -18,50 +19,48 @@ public class LevelController : MonoBehaviour {
     
     public static void LoadLevels()
     {
-        const float snowTreeDensity1 = 0.0008f;
-        const float snowFenceDensity1 = 0.01f;
+        if (levelLoaded) {
+            Debug.Log("Levels already loaded. Prevented second load.");
+            return;
+        }
+        const float cloudDensity = 0.002f;
+
         ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity1),
-            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity1)
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => 0.0008f),
+            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => 0.01f)
         }, (GameObject)Resources.Load("PlaneSnow"));
 
-        const float snowTreeDensity2 = 0.02f;
-        const float snowFenceDensity2 = 0.0012f;
         ChunkTemplate snowChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity2),
-            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity2)
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => 0.02f),
+            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => 0.0012f)
         }, (GameObject)Resources.Load("PlaneSnow"));
-
-        const float forestTreeDensity1 = 0.01f;
-        const float forestFenceDensity1 = 0.004f;
-        const float forestGrassDensity1 = 0.05f;
+        
         ChunkTemplate forestChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity1),
-            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity1),
-            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity1)
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => 0.01f),
+            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => 0.004f),
+            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => 0.05f)
         }, (GameObject)Resources.Load("PlaneGrass"));
-
-        const float forestTreeDensity2 = 0.03f;
-        const float forestFenceDensity2 = 0.008f;
-        const float forestGrassDensity2 = 0.05f;
+        
         ChunkTemplate forestChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity2),
-            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity2),
-            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => 0.03f),
+            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => 0.008f),
+            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => 0.05f)
         }, (GameObject)Resources.Load("PlaneGrass"));
 
+        GameObject walls = (GameObject)Resources.Load("Mountain");
         int amountOfBones = 10;
         int levelLength = 100;
         float levelWidth = 30;
-        LevelManager.levels = new List<Level>();
-        Level level1 = new Level(1, snowChunkTemplate1, (GameObject)Resources.Load("Mountain"), 0, levelLength, levelWidth, amountOfBones, true);
-        Level level2 = new Level(2, snowChunkTemplate2, (GameObject)Resources.Load("Mountain"), level1.EndZ, level1.EndZ + levelLength, levelWidth, amountOfBones);
-        Level level3 = new Level(3, forestChunkTemplate1, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, levelWidth, amountOfBones);
-        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level3.EndZ, level3.EndZ + levelLength, levelWidth, amountOfBones);
-        LevelManager.levels.Add(level1);
-        LevelManager.levels.Add(level2);
-        LevelManager.levels.Add(level3);
-        LevelManager.levels.Add(level4);
+        List<Level> lvls = new List<Level>();
+        lvls.Add(new Level(lvls.Count + 1, snowChunkTemplate1, walls, 0, levelLength, levelWidth, amountOfBones, true));
+        lvls.Add(new Level(lvls.Count + 1, snowChunkTemplate2, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        lvls.Add(new Level(lvls.Count + 1, forestChunkTemplate1, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        lvls.Add(new Level(lvls.Count + 1, forestChunkTemplate2, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        LevelManager.levels = lvls;
     }
 
     public void RestartCurrentLevel() {
@@ -303,9 +302,6 @@ public class Level {
     }
 
     private void SpawnChunk(float chunkStartZ) {
-        // For testing
-        GameObject pathBlueprint = (GameObject)Resources.Load("Path");
-
         if (chunkStartZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
             if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
@@ -330,6 +326,7 @@ public class Level {
                 }
 
                 /*
+                GameObject pathBlueprint = (GameObject)Resources.Load("Path");
                 foreach (Vector3 pathPoint in path) {
                     if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
                         spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
