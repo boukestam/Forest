@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class LevelController : MonoBehaviour {
     private LevelManager levelManager;
+    private static bool levelLoaded = false;
 
     void Start() {
         levelManager = new LevelManager();
@@ -19,10 +20,16 @@ public class LevelController : MonoBehaviour {
 
     public static void LoadLevels()
     {
+        if (levelLoaded) {
+            Debug.Log("Level already loaded.");
+            return;
+        }
+        const float cloudDensity = 0.002f;
 
         const float snowTreeDensity1 = 0.0008f;
         const float snowFenceDensity1 = 0.01f;
         ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity1),
             new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity1)
         }, (GameObject)Resources.Load("PlaneSnow"));
@@ -30,6 +37,7 @@ public class LevelController : MonoBehaviour {
         const float snowTreeDensity2 = 0.02f;
         const float snowFenceDensity2 = 0.0012f;
         ChunkTemplate snowChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity2),
             new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity2)
         }, (GameObject)Resources.Load("PlaneSnow"));
@@ -38,6 +46,7 @@ public class LevelController : MonoBehaviour {
         const float forestFenceDensity1 = 0.004f;
         const float forestGrassDensity1 = 0.05f;
         ChunkTemplate forestChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity1),
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity1),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity1)
@@ -47,6 +56,7 @@ public class LevelController : MonoBehaviour {
         const float forestFenceDensity2 = 0.008f;
         const float forestGrassDensity2 = 0.05f;
         ChunkTemplate forestChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity2),
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity2),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
@@ -310,9 +320,6 @@ public class Level {
     }
 
     private void SpawnChunk(float chunkStartZ) {
-        // For testing
-        GameObject pathBlueprint = (GameObject)Resources.Load("Path");
-
         if (chunkStartZ + ChunkLength <= this.EndZ) { // Prevent new chunk spawning past the map.
             if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
@@ -337,6 +344,7 @@ public class Level {
                 }
 
                 /*
+                GameObject pathBlueprint = (GameObject)Resources.Load("Path");
                 foreach (Vector3 pathPoint in path) {
                     if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
                         spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
