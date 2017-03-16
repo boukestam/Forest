@@ -43,11 +43,11 @@ public class SpawnableDensityObject {
     public Action<SpawnableDensityObject, Vector3, List<GameObject>> SpawnFunc;
 
     public SpawnableDensityObject(string newResourceName, Action<SpawnableDensityObject, Vector3, List<GameObject>> newSpawnFunc) {
-        ParentObject = new GameObject();
-        ParentObject.name = newResourceName;
         this.Resource = (GameObject)Resources.Load(newResourceName);
         this.SpawnFunc = newSpawnFunc;
         this.resourceName = newResourceName;
+        ParentObject = new GameObject();
+        ParentObject.name = resourceName;
     }
 }
 
@@ -59,7 +59,7 @@ public class SpawnableGroup : SpawnableDensityObject {
     }
 }
 
-public class ChunkTemplate : ICloneable {
+public class ChunkTemplate {
     public float TotalDensity;
 
     public List<SpawnableGroup> SpawnTypes;
@@ -70,9 +70,9 @@ public class ChunkTemplate : ICloneable {
         SpawnTypes = newSpawnTypes;
         TotalDensity = getTotalDensity();
         this.Plane = plane;
-        this.PlaneParent = new GameObject();
-        this.PlaneParent.name = "Plane";
         this.Plane.GetComponent<Collider>().tag = "Ground";
+        PlaneParent = new GameObject();
+        PlaneParent.name = Plane.name;
     }
 
     private float getTotalDensity() {
@@ -81,10 +81,6 @@ public class ChunkTemplate : ICloneable {
             density += SpawnTypes[i].Density();
         }
         return density;
-    }
-
-    public object Clone() {
-        return this.MemberwiseClone();
     }
 }
 

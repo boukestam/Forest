@@ -17,12 +17,8 @@ public class LevelController : MonoBehaviour {
         levelManager.Update();
     }
     
-    public static void LoadLevels()
-    {
-        if (levelLoaded) {
-            Debug.Log("Levels already loaded. Prevented second load.");
-            return;
-        }
+    public static void LoadLevels() {
+        levelLoaded = true;
         const float cloudDensity = 0.004f;
 
         ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
@@ -36,14 +32,14 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => 0.02f),
             new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => 0.0012f)
         }, (GameObject)Resources.Load("PlaneSnow"));
-        
+
         ChunkTemplate forestChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => 0.01f),
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => 0.004f),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => 0.05f)
         }, (GameObject)Resources.Load("PlaneGrass"));
-        
+
         ChunkTemplate forestChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
             new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => 0.03f),
@@ -107,6 +103,7 @@ public class LevelManager {
         //Unlock new level and save this level as last level
         PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 1);
         PlayerPrefs.SetInt("Level" + (currentLevel + 1), 1);
+        PlayerPrefs.Save();
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
@@ -154,7 +151,7 @@ public class Level {
     private static float ChunkLength = 2;
 
     private GameObject Player;
-    private ChunkTemplate Template;
+    public ChunkTemplate Template;
     private GameObject edgePrefab;
     public float furdestPlacedEdge = 0;
     public float StartZ;

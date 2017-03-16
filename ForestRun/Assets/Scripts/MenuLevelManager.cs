@@ -19,6 +19,7 @@ public class MenuLevelManager : MonoBehaviour {
             button.LevelText.text = level.levelNumber + "";
 
             if (PlayerPrefs.GetInt("Level" + level.levelNumber) == 1) {
+
                 level.unlocked = true;
                 level.isInteractable = true;
             }
@@ -42,15 +43,34 @@ public class MenuLevelManager : MonoBehaviour {
         SaveAll();
     }
 
+    private void Update() {
+        GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
+        foreach (var levelButton in allLevelButtons) {
+            LevelButton button = levelButton.GetComponent<LevelButton>();
+            Button buttonBase = button.GetComponent<Button>();
+            int levelnumber = int.Parse(button.LevelText.text);
+
+            if (PlayerPrefs.GetInt("Level" + levelnumber) == 1) {
+                
+                button.unlocked = true;
+                buttonBase.interactable = true;
+            } else {
+
+                button.unlocked = false;
+                buttonBase.interactable = false;
+            }            
+        }
+    }
+
     void SaveAll() {
         GameObject[] allLevelButtons = GameObject.FindGameObjectsWithTag("LevelButton");
         foreach (var levelButton in allLevelButtons) {
             LevelButton button = levelButton.GetComponent<LevelButton>();
             if (button.unlocked) {
-                Debug.Log("unlocked: " + button.LevelText.text);
                 PlayerPrefs.SetInt("Level" + button.LevelText.text, 1);
             }
         }
+        PlayerPrefs.Save();
     }
 
     public void DeleteAll() {
