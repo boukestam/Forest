@@ -29,13 +29,15 @@ public class MenuLevelManager : MonoBehaviour {
             buttonBase.onClick.AddListener(() => LoadLevel(level.levelNumber));
 
             int score = PlayerPrefs.GetInt("Level" + level.levelNumber + "_score");
-            if (score > level.amountOfBones / 10) {
+            int stars = Level.GetStars(score, (int)level.amountOfBones);
+            if (stars == 1) {
                 button.star1.SetActive(true);
-            }
-            if (score > level.amountOfBones / 2) {
+            } else if (stars == 2) {
+                button.star1.SetActive(true);
                 button.star2.SetActive(true);
-            }
-            if (score >= level.amountOfBones) {
+            } else if (stars == 3) {
+                button.star1.SetActive(true);
+                button.star2.SetActive(true);
                 button.star3.SetActive(true);
             }
             levelButton.transform.SetParent(spacer.transform, false);

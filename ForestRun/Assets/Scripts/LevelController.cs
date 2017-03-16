@@ -73,11 +73,23 @@ public class LevelManager {
     public static List<Level> levels;
     private int currentLevel;
     private GameObject scorePanel;
+    private GameObject star1;
+    private GameObject star2;
+    private GameObject star3;
     private PlayerController playerController;
     bool scoreMenu = false;
 
     public LevelManager() {
         scorePanel = GameObject.Find("ScorePanel");
+
+        star1 = GameObject.Find("Star1");
+        star2 = GameObject.Find("Star2");
+        star3 = GameObject.Find("Star3");
+
+        star1.SetActive(false);
+        star2.SetActive(false);
+        star3.SetActive(false);
+
         scorePanel.SetActive(false);
         playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
         currentLevel = PlayerPrefs.GetInt("lastPlayedLevel") - 1;
@@ -89,13 +101,31 @@ public class LevelManager {
         }
         scoreMenu = true;
         scorePanel.SetActive(true);
-        scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: " + playerController.getPoints();
+        int score = playerController.getPoints();
+        switch (Level.GetStars(score, (int)levels[currentLevel].amountOfBones)) {
+            case 1:
+                star1.SetActive(true);
+                break;
+            case 2:
+                star1.SetActive(true);
+                star2.SetActive(true);
+                break;
+            case 3:
+                star1.SetActive(true);
+                star2.SetActive(true);
+                star3.SetActive(true);
+                break;
+        }
+        scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: " + score;
         playerController.Freeze();
     }
 
     private void ExitScorePanel() {
         scoreMenu = false;
         scorePanel.SetActive(false);
+        star1.SetActive(false);
+        star2.SetActive(false);
+        star3.SetActive(false);
         playerController.Unfreeze();
     }
 
@@ -194,6 +224,19 @@ public class Level {
 
         path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
+    }
+    
+    public static int GetStars(int score, int maxScore) {
+        if (score >= maxScore) {
+            return 3;
+        }
+        if (score > maxScore / 2) {
+            return 2;
+        }
+        if (score > maxScore / 10) {
+            return 1;
+        }
+        return 0;
     }
 
     private void GenerateBoneLocations(List<Vector3> newPath) {
