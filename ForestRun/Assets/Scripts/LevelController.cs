@@ -36,10 +36,12 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity2),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
         }, (GameObject)Resources.Load("GrassPlane"));
-        
+
+        float levelWidth = 30;
+
         LevelManager.levels = new List<Level>();
-        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, 80, 60, true));
-        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, 80, 60));
+        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, levelWidth, 60, true));
+        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, levelWidth, 60));
 
         /*levelManager = new LevelManager(new List<Level>() {
             new Level(1, forestChunkTemplate, 0, 100, 80, true),
@@ -102,7 +104,7 @@ public class LevelManager {
 
     public void Update() {
         if (scoreMenu) {
-            if (Input.GetButtonDown("Submit")) {
+            if (Input.GetButtonDown("Jump")) {
                 NextLevel();
             }
         } else {
@@ -264,17 +266,22 @@ public class Level {
         Random.InitState(this.Seed + (int)(startZ * 100));
 
         for (float z = startZ; z < endZ; z += pathStepSize) {
-            // Vector3 pathPoint = new Vector3((Mathf.Sin(z / pathLength) + Mathf.Sin(z / (pathLength / 4))) * pathWidth, 0, z);
-
             Vector3 pathPoint = new Vector3(x, 0, z);
             path.Add(pathPoint);
+
             deltaX += Random.Range(-randomness, randomness);
+
             if(deltaX > maxDeltaX) {
                 deltaX = maxDeltaX;
             }
             if (deltaX < -maxDeltaX) {
                 deltaX = -maxDeltaX;
             }
+
+            if(Mathf.Abs(x + (deltaX * 10)) > this.ChunkWidthRadius) {
+                deltaX *= 0.5f;
+            }
+
             x += deltaX;
         }
 
@@ -308,11 +315,13 @@ public class Level {
                     }
                 }
 
+                /*
                 foreach (Vector3 pathPoint in path) {
                     if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
                         spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
                     }
                 }
+                */
 
                 // Add bones to the chunk.
                 Random.InitState(System.DateTime.Now.Millisecond);
