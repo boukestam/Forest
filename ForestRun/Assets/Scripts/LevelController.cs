@@ -47,7 +47,20 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => 0.05f)
         }, (GameObject)Resources.Load("PlaneGrass"));
 
+        ChunkTemplate cityChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.01f),
+            new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.01f)
+        }, (GameObject)Resources.Load("PlaneAsphalt"));
+
+        ChunkTemplate cityChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.04f),
+            new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.01f)
+        }, (GameObject)Resources.Load("PlaneAsphalt"));
+
         GameObject walls = (GameObject)Resources.Load("Mountain");
+        GameObject building = (GameObject)Resources.Load("Building");
         int amountOfBones = 10;
         int levelLength = 100;
         float levelWidth = 30;
@@ -56,6 +69,8 @@ public class LevelController : MonoBehaviour {
         lvls.Add(new Level(lvls.Count + 1, snowChunkTemplate2, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         lvls.Add(new Level(lvls.Count + 1, forestChunkTemplate1, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         lvls.Add(new Level(lvls.Count + 1, forestChunkTemplate2, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        lvls.Add(new Level(lvls.Count + 1, cityChunkTemplate1, building, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        lvls.Add(new Level(lvls.Count + 1, cityChunkTemplate2, building, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         LevelManager.levels = lvls;
     }
 
@@ -69,11 +84,23 @@ public class LevelManager {
     public static List<Level> levels;
     private int currentLevel;
     private GameObject scorePanel;
+    private GameObject star1;
+    private GameObject star2;
+    private GameObject star3;
     private PlayerController playerController;
     bool scoreMenu = false;
 
     public LevelManager() {
         scorePanel = GameObject.Find("ScorePanel");
+
+        star1 = GameObject.Find("Star1");
+        star2 = GameObject.Find("Star2");
+        star3 = GameObject.Find("Star3");
+
+        star1.SetActive(false);
+        star2.SetActive(false);
+        star3.SetActive(false);
+
         scorePanel.SetActive(false);
         playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
         currentLevel = PlayerPrefs.GetInt("lastPlayedLevel") - 1;
@@ -85,13 +112,31 @@ public class LevelManager {
         }
         scoreMenu = true;
         scorePanel.SetActive(true);
-        scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: " + playerController.getPoints();
+        int score = playerController.getPoints();
+        switch (Level.GetStars(score, (int)levels[currentLevel].amountOfBones)) {
+            case 1:
+                star1.SetActive(true);
+                break;
+            case 2:
+                star1.SetActive(true);
+                star2.SetActive(true);
+                break;
+            case 3:
+                star1.SetActive(true);
+                star2.SetActive(true);
+                star3.SetActive(true);
+                break;
+        }
+        scorePanel.transform.FindChild("Score").gameObject.GetComponent<Text>().text = "Score: " + score;
         playerController.Freeze();
     }
 
     private void ExitScorePanel() {
         scoreMenu = false;
         scorePanel.SetActive(false);
+        star1.SetActive(false);
+        star2.SetActive(false);
+        star3.SetActive(false);
         playerController.Unfreeze();
     }
 
@@ -190,6 +235,19 @@ public class Level {
 
         path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
+    }
+    
+    public static int GetStars(int score, int maxScore) {
+        if (score >= maxScore) {
+            return 3;
+        }
+        if (score > maxScore / 2) {
+            return 2;
+        }
+        if (score > maxScore / 10) {
+            return 1;
+        }
+        return 0;
     }
 
     private void GenerateBoneLocations(List<Vector3> newPath) {
@@ -354,11 +412,15 @@ public class Level {
                         newChunk.Spawned.Add(rememberEdgeLeft);
                         newChunk.Spawned.Add(rememberEdgeRight);
                     }
-                    float edgeWidthRadius = edgePrefab.GetComponent<Renderer>().bounds.size.x / 2;
-                    float edgeLength = edgePrefab.GetComponent<Renderer>().bounds.size.z;
+                    Renderer theRenderer = edgePrefab.GetComponent<Renderer>();
+                    if(theRenderer == null) {
+                        theRenderer = edgePrefab.GetComponentInChildren<Renderer>();
+                    }
+                    float edgeWidthRadius = theRenderer.bounds.size.x / 2;
+                    float edgeLength = theRenderer.bounds.size.z;
                     float offsetZ = edgeLength / 2;
                     rememberEdgeLeft = SpawnController.Instantiate(edgePrefab, new Vector3(-ChunkWidthRadius - edgeWidthRadius, 0, furdestPlacedEdge + offsetZ), Quaternion.identity);
-                    rememberEdgeRight = SpawnController.Instantiate(edgePrefab, new Vector3(ChunkWidthRadius + edgeWidthRadius, 0, furdestPlacedEdge + offsetZ), Quaternion.identity);
+                    rememberEdgeRight = SpawnController.Instantiate(edgePrefab, new Vector3(ChunkWidthRadius + edgeWidthRadius, 0, furdestPlacedEdge + offsetZ), Quaternion.Euler(0,180,0));
                     furdestPlacedEdge += edgeLength;
                 }
 
