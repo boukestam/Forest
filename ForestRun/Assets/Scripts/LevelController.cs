@@ -23,7 +23,7 @@ public class LevelController : MonoBehaviour {
             Debug.Log("Levels already loaded. Prevented second load.");
             return;
         }
-        const float cloudDensity = 0.002f;
+        const float cloudDensity = 0.004f;
 
         ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
@@ -199,7 +199,8 @@ public class Level {
         bones.Clear();
         Random.InitState(System.DateTime.Now.Millisecond);
 
-        float stepSize = (this.EndZ - this.StartZ) / this.amountOfBones;
+        const float offsetStartBoneSpawnZ = 6;
+        float stepSize = (this.EndZ - this.StartZ - offsetStartBoneSpawnZ) / this.amountOfBones;
 
         // Tweakable variables
         float percentageChangeOffPath = 0.5f;
@@ -217,7 +218,7 @@ public class Level {
                 Vector3 boneLocation = new Vector3(newPath[i].x, newPath[i].y, newPath[i].z);
                 float negativeRange = (bones.Count > 0) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
                 float possitiveRange = (bones.Count < this.amountOfBones - 2) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
-                boneLocation.z += Random.Range(-negativeRange, possitiveRange);
+                boneLocation.z += offsetStartBoneSpawnZ+Random.Range(-negativeRange, possitiveRange);
                 if (Random.Range(0.0f, 1.0f) < percentageChangeOffPath) {
                     boneLocation.x += Random.Range(0.0f, 1.0f) >= 0.5f ? Random.Range(-offPathMinimumX, -offPathMaximumX) : Random.Range(offPathMinimumX, offPathMaximumX);
                 }
