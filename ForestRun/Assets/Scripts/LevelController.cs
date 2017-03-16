@@ -19,14 +19,29 @@ public class LevelController : MonoBehaviour {
 
     public static void LoadLevels()
     {
-        const float forestTreeDensity = 0.01f;
-        const float forestFenceDensity = 0.004f;
-        const float forestGrassDensity = 0.05f;
-        ChunkTemplate forestChunkTemplate = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity),
-            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity),
-            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity)
-        }, (GameObject)Resources.Load("GrassPlane"));
+
+        const float snowTreeDensity1 = 0.0008f;
+        const float snowFenceDensity1 = 0.01f;
+        ChunkTemplate snowChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity1),
+            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity1)
+        }, (GameObject)Resources.Load("PlaneSnow"));
+
+        const float snowTreeDensity2 = 0.02f;
+        const float snowFenceDensity2 = 0.0012f;
+        ChunkTemplate snowChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Pinetree", SpawnController.spawnTreeFunc, () => snowTreeDensity2),
+            new SpawnableGroup("PenguinGroup", SpawnController.spawnFenceFunc, () => snowFenceDensity2)
+        }, (GameObject)Resources.Load("PlaneSnow"));
+
+        const float forestTreeDensity1 = 0.01f;
+        const float forestFenceDensity1 = 0.004f;
+        const float forestGrassDensity1 = 0.05f;
+        ChunkTemplate forestChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity1),
+            new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity1),
+            new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity1)
+        }, (GameObject)Resources.Load("PlaneGrass"));
 
         const float forestTreeDensity2 = 0.03f;
         const float forestFenceDensity2 = 0.008f;
@@ -35,13 +50,20 @@ public class LevelController : MonoBehaviour {
             new SpawnableGroup("Tree", SpawnController.spawnTreeFunc, () => forestTreeDensity2),
             new SpawnableGroup("Fence", SpawnController.spawnFenceFunc, () => forestFenceDensity2),
             new SpawnableGroup("Grass", SpawnController.spawnGrassFunc, () => forestGrassDensity2)
-        }, (GameObject)Resources.Load("GrassPlane"));
+        }, (GameObject)Resources.Load("PlaneGrass"));
 
+        int amountOfBones = 10;
+        int levelLength = 100;
         float levelWidth = 30;
-
         LevelManager.levels = new List<Level>();
-        LevelManager.levels.Add(new Level(1, forestChunkTemplate, (GameObject)Resources.Load("Mountain"), 0, 500, levelWidth, 60, true));
-        LevelManager.levels.Add(new Level(2, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), 500, 1000, levelWidth, 60));
+        Level level1 = new Level(1, snowChunkTemplate1, (GameObject)Resources.Load("Mountain"), 0, levelLength, levelWidth, amountOfBones, true);
+        Level level2 = new Level(2, snowChunkTemplate2, (GameObject)Resources.Load("Mountain"), level1.EndZ, level1.EndZ + levelLength, levelWidth, amountOfBones);
+        Level level3 = new Level(3, forestChunkTemplate1, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, levelWidth, amountOfBones);
+        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, levelWidth, amountOfBones);
+        LevelManager.levels.Add(level1);
+        LevelManager.levels.Add(level2);
+        LevelManager.levels.Add(level3);
+        LevelManager.levels.Add(level4);
 
         /*levelManager = new LevelManager(new List<Level>() {
             new Level(1, forestChunkTemplate, 0, 100, 80, true),
@@ -145,7 +167,7 @@ public class Level {
     public float furdestPlacedEdge=0;
     public float StartZ;
     public float amountOfBones;
-    private float EndZ;
+    public float EndZ;
     private float ChunkWidthRadius;
 
     GameObject rememberEdgeLeft = null;
@@ -210,7 +232,6 @@ public class Level {
                 bones.Add(boneLocation);
             }
         }
-        Debug.Log(bones.Count);
     }
 
     public void Update() {
