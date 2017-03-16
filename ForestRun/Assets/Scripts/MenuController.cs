@@ -4,9 +4,6 @@ using UnityEngine.SceneManagement;
 public class MenuController : MonoBehaviour {
     public float RunAnimationSpeed = 3f;
 
-    private bool loadLock = false;
-    string nextSceneName;
-
     private GameObject Dog;
 
     void Start() {

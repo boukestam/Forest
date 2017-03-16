@@ -108,6 +108,7 @@ public class LevelManager {
         //Unlock new level and save this level as last level
         PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 1);
         PlayerPrefs.SetInt("Level" + (currentLevel + 1), 1);
+        PlayerPrefs.Save();
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
