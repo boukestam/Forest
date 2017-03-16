@@ -58,7 +58,7 @@ public class LevelController : MonoBehaviour {
         Level level1 = new Level(1, snowChunkTemplate1, (GameObject)Resources.Load("Mountain"), 0, levelLength, 80, amountOfBones, true);
         Level level2 = new Level(2, snowChunkTemplate2, (GameObject)Resources.Load("Mountain"), level1.EndZ, level1.EndZ + levelLength, 80, amountOfBones);
         Level level3 = new Level(3, forestChunkTemplate1, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, 80, amountOfBones);
-        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level2.EndZ, level2.EndZ + levelLength, 80, amountOfBones);
+        Level level4 = new Level(4, forestChunkTemplate2, (GameObject)Resources.Load("Mountain"), level3.EndZ, level3.EndZ + levelLength, 80, amountOfBones);
         LevelManager.levels.Add(level1);
         LevelManager.levels.Add(level2);
         LevelManager.levels.Add(level3);
