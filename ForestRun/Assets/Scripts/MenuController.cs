@@ -24,7 +24,7 @@ public class MenuController : MonoBehaviour {
 
     void LoadScene(string sceneName) {
         SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-        Scene nextScene = SceneManager.GetSceneByName("Main");
+        Scene nextScene = SceneManager.GetSceneByName(sceneName);
         if (nextScene.IsValid()) {
             SceneManager.LoadScene(nextScene.buildIndex);
         }

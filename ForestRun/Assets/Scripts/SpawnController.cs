@@ -8,7 +8,6 @@ public class SpawnController : MonoBehaviour {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
-
     }
     public static void spawnFenceFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
         GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(Vector3.zero));
@@ -82,6 +81,7 @@ public class ChunkTemplate {
 }
 
 public class Chunk {
+    private static int seed = (int)DateTime.Now.Ticks;
     private static System.Random rand = new System.Random();
     private float SpawnCount;
 
@@ -99,6 +99,7 @@ public class Chunk {
         SpawnController.spawnPlaneFunc(this, newChunkTemplate.Plane, new Vector3());
 
         for (int i = 0; i < SpawnCount; i++) {
+            UnityEngine.Random.InitState(seed++);
             Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(SpawnArea.xMin, SpawnArea.xMax), 0, UnityEngine.Random.Range(SpawnArea.yMin, SpawnArea.yMax));
 
             // Spawn a random GameObject in the average of the density of all combined GameObjects.
