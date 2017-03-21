@@ -199,7 +199,7 @@ public class LevelManager {
 
             levels[currentLevel].Update();
             if (currentLevel + 1 < levels.Count) {
-                levels[currentLevel].Update();
+                levels[currentLevel + 1].Update();
             }
         }
     }
