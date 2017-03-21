@@ -35,6 +35,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4260882901711008}
+  - component: {fileID: 65893041507921098}
   m_Layer: 0
   m_Name: Lamppost
   m_TagString: Untagged
@@ -52,7 +53,6 @@ GameObject:
   - component: {fileID: 4946105068901478}
   - component: {fileID: 33874026827493980}
   - component: {fileID: 23354155082684532}
-  - component: {fileID: 65276660897744936}
   m_Layer: 0
   m_Name: Lamppost
   m_TagString: Untagged
@@ -67,7 +67,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1515508164311804}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.083446495, y: 2.6143434e-24, z: -0.011773956}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4946105068901478}
@@ -140,18 +140,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1951124412389442}
   m_Mesh: {fileID: 4300000, guid: af356a09c36cdb74eaa60ae1da52a44c, type: 3}
---- !u!65 &65276660897744936
+--- !u!65 &65893041507921098
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1951124412389442}
+  m_GameObject: {fileID: 1515508164311804}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.01981856, y: 0.019016188, z: 0.094967626}
-  m_Center: {x: 0.00007164804, y: -0.000281102, z: 0.04758938}
+  m_Size: {x: 0.6471133, y: 2.8618784, z: 0.5965993}
+  m_Center: {x: 0.016593516, y: 1.42115, z: 0.039785475}
 --- !u!108 &108535290931180060
 Light:
   m_ObjectHideFlags: 1
