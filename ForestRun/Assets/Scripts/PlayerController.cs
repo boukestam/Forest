@@ -10,7 +10,6 @@ public class PlayerController : MonoBehaviour {
     public float JumpForce = 1;
     public float RunAnimationSpeed = 3f;
 
-
     private bool Grounded = true;
     private bool Dead = false;
     private bool FreezeBool = false;
@@ -27,6 +26,9 @@ public class PlayerController : MonoBehaviour {
     public float maxRotation = 90f;
     private float rotationSpeed = 2.5f;
 
+    Vector3 zeroAc;
+    Vector3 curAc;
+
     void Start () {
         Score = GameObject.Find("Score");
 
@@ -35,6 +37,9 @@ public class PlayerController : MonoBehaviour {
 
         Dog = GameObject.Find("Dog");
         Dog.GetComponent<Animation>()["Running"].speed = RunAnimationSpeed;
+
+        zeroAc = Input.acceleration;
+        curAc = Vector3.zero;
     }
 
     public void addPoints(int amount) {
@@ -63,16 +68,14 @@ public class PlayerController : MonoBehaviour {
         Dead = true;
         DeathPanel.SetActive(true);
         Freeze();
-
     }
 
-    void Restart() {
+    public void Restart() {
         Dead = false;
         DeathPanel.SetActive(false);
         Unfreeze();
         setPoints(0);
-        
-        ((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
+        //((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
     }
 
     void OnCollisionEnter(Collision collision) {
@@ -101,28 +104,44 @@ public class PlayerController : MonoBehaviour {
         if (FreezeBool) {
             return;
         }
+#if UNITY_IPHONE || UNITY_ANDROID
+        foreach (var touch in Input.touches) {
+            if (touch.phase == TouchPhase.Ended && Grounded) {
+
+                GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
+                Grounded = false;
+            }
+        }
+#else
         if (Grounded && Input.GetButtonDown("Jump")) {
+
             GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
             Grounded = false;
         }
+#endif
     }
 
     void FixedUpdate () {
-        if (Dead) {
-            if (Input.GetButtonDown("Restart")) {
-                Restart();
-            }
-        }
         if (FreezeBool) {
             return;
         }
+
+#if UNITY_IPHONE || UNITY_ANDROID
+        curAc = Vector3.Lerp(curAc, Input.acceleration-zeroAc, Time.fixedDeltaTime);
+        float axisValue = Mathf.Clamp(curAc.x * 100, -maxRotation, maxRotation);
         
+        Vector3 eulerAngles = transform.eulerAngles;
+
+        eulerAngles.y = axisValue;
+        
+        transform.eulerAngles = eulerAngles;
+        transform.position += transform.forward * ForwardSpeed * Time.fixedDeltaTime;
+#else
         float axisValue = Input.GetAxis("Horizontal");
-        
+
         if (enchantedMovement)
         {
             float runningAngleAddition = 0f;
-            
             if (axisValue <= -1f)
             {
                 //left
@@ -132,7 +151,7 @@ public class PlayerController : MonoBehaviour {
                 //right
                 runningAngleAddition = rotationSpeed;
             }
-            
+
             if (!Grounded)
             {
                 runningAngleAddition *= .5f;
@@ -163,7 +182,8 @@ public class PlayerController : MonoBehaviour {
                 transform.position.z + (ForwardSpeed * Time.fixedDeltaTime)
             );
         }
-        
+#endif
+
         Score.GetComponent<Text>().text = (points).ToString();
 	}
 }
