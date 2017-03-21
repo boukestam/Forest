@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 5a1d3c9e219d31b4db55e778efebb257
-timeCreated: 1486985979
+guid: 1335878dcb6833f4bb0ae0ebbee0f8cc
+timeCreated: 1490095643
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -27,11 +27,11 @@ ModelImporter:
     3300004: Cube_Cube.002_Material.003
     3300006: Cylinder.001_Cylinder.002_Material.002
     3300008: Cylinder_Cylinder.001_Material.001
-    4300000: Cube.001_Cube.003_Material.005
-    4300002: Cube.002_Cube.004_Material.004
-    4300004: Cube_Cube.002_Material.003
-    4300006: Cylinder.001_Cylinder.002_Material.002
-    4300008: Cylinder_Cylinder.001_Material.001
+    4300000: Cylinder.001_Cylinder.002_Material.002
+    4300002: Cylinder_Cylinder.001_Material.001
+    4300004: Cube.002_Cube.004_Material.004
+    4300006: Cube_Cube.002_Material.003
+    4300008: Cube.001_Cube.003_Material.005
   materials:
     importMaterials: 1
     materialName: 0
