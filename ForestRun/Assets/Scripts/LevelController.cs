@@ -94,6 +94,7 @@ public class LevelController : MonoBehaviour {
         lvls.Add(new Level(lvls.Count + 1, snowChunkTemplate3, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         lvls.Add(new Level(lvls.Count + 1, forestChunkTemplate3, walls, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         lvls.Add(new Level(lvls.Count + 1, cityChunkTemplate3, building, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
+        lvls[lvls.Count - 1].SetLastLevel(true);
         LevelManager.levels = lvls;
     }
 
@@ -230,6 +231,8 @@ public class Level {
     public float EndZ;
     private float ChunkWidthRadius;
 
+    private bool lastLevel = false;
+
     GameObject rememberEdgeLeft = null;
     GameObject rememberEdgeRight = null;
 
@@ -286,25 +289,28 @@ public class Level {
 
         // Tweakable variables
         float percentageChangeOffPath = 0.5f;
-        float offPathMinimumX = 1.0f;
-        float offPathMaximumX = 2.0f;
+        float offPathMinimumX = 0.0f;
+        float offPathMaximumX = 0.2f;
         float maxRandomDisplacementZ = stepSize / 3.0f;
 
+        float randomAdder = offsetStartBoneSpawnZ + Random.Range(maxRandomDisplacementZ / 1.5f, maxRandomDisplacementZ);
         float lastBoneLocationZ = this.StartZ - stepSize + offsetStartBoneSpawnZ;
         for (int i = 0; i < newPath.Count; i++) {
             if (newPath[i].z > this.EndZ) {
                 break;
             }
-            if (newPath[i].z > lastBoneLocationZ + stepSize) {
+            if (newPath[i].z > lastBoneLocationZ + stepSize + randomAdder) {
                 lastBoneLocationZ += stepSize;
                 Vector3 boneLocation = new Vector3(newPath[i].x, newPath[i].y, newPath[i].z);
-                float negativeRange = (bones.Count > 0) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
-                float possitiveRange = (bones.Count < this.amountOfBones - 2) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
-                boneLocation.z += offsetStartBoneSpawnZ + Random.Range(-negativeRange, possitiveRange);
+
                 if (Random.Range(0.0f, 1.0f) < percentageChangeOffPath) {
                     boneLocation.x += Random.Range(0.0f, 1.0f) >= 0.5f ? Random.Range(-offPathMinimumX, -offPathMaximumX) : Random.Range(offPathMinimumX, offPathMaximumX);
                 }
                 bones.Add(boneLocation);
+
+                float negativeRange = (bones.Count > 0) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
+                float possitiveRange = (bones.Count < this.amountOfBones - 2) ? maxRandomDisplacementZ : -maxRandomDisplacementZ / 1.5f;
+                randomAdder = offsetStartBoneSpawnZ + Random.Range(-negativeRange, possitiveRange);
             }
         }
     }
@@ -320,6 +326,10 @@ public class Level {
         if (furdestLocationZ - Player.transform.position.z < MinimumRenderDistanceZ) {
             SpawnChunk(furdestLocationZ);
         }
+    }
+
+    public void SetLastLevel(bool newLastLevel) {
+        this.lastLevel = newLastLevel;
     }
 
     public bool CompletedLevel() {
@@ -420,13 +430,14 @@ public class Level {
 
                 // Add objects on path
                 Random.InitState(Seed);
+                int minimumFreeSpaceForBones = 4;
                 int pathI = Random.Range(8, 12);
                 while(pathI < path.Count) {
                     float z = pathI + path[0].z;
 
                     if (z >= chunkStartZ && z <= chunkStartZ + ChunkLength) {
                         for (int i = 0; i < bones.Count; i++) {
-                            if(Mathf.Abs(bones[i].z - z) < 2) {
+                            if(Mathf.Abs(bones[i].z - z) <= minimumFreeSpaceForBones) {
                                 pathI++;
                                 goto endPathLoop;
                             }
@@ -463,6 +474,17 @@ public class Level {
                 // If last chunk add finish plane.
                 if (chunkStartZ + ChunkLength == this.EndZ) {
                     SpawnController.spawnPlaneFunc(newChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(0, 0.001f, 0));
+                    if (this.lastLevel) {
+                        //SpawnController.spawnPlaneFunc(newChunk, (GameObject)Resources.Load("FinishPlane"), new Vector3(ChunkLength, 0.001f, 0));
+
+                        GameObject endWall = (GameObject)Resources.Load("EndWall");
+                        endWall.transform.localScale = new Vector3(2 * ChunkWidthRadius, 20, 1);
+                        float endWallX = 0;
+                        float endWallY = endWall.transform.localScale.y / 2;
+                        float endWallZ = endWall.transform.localScale.z / 2 + furdestPlacedEdge;
+                        Vector3 endWallPos = new Vector3(endWallX, endWallY, endWallZ);
+                        SpawnController.Instantiate(endWall, endWallPos, Quaternion.identity);
+                    }
                 }
 
                 // Add edge objects to the map.
