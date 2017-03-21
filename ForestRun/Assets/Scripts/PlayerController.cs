@@ -56,23 +56,27 @@ public class PlayerController : MonoBehaviour {
 
     public void Freeze() {
         FreezeBool = true;
-        Dog.GetComponent<Animation>().Stop();
+        if (Dog != null)
+            Dog.GetComponent<Animation>().Stop();
     }
 
     public void Unfreeze() {
         FreezeBool = false;
-        Dog.GetComponent<Animation>().Play();
+        if (Dog != null)
+            Dog.GetComponent<Animation>().Play();
     }
 
     void Die() {
         Dead = true;
-        DeathPanel.SetActive(true);
+        if (DeathPanel != null)
+            DeathPanel.SetActive(true);
         Freeze();
     }
 
     public void Restart() {
         Dead = false;
-        DeathPanel.SetActive(false);
+        if (DeathPanel != null)
+            DeathPanel.SetActive(false);
         Unfreeze();
         setPoints(0);
         //((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
@@ -98,7 +102,7 @@ public class PlayerController : MonoBehaviour {
     private void Update() {
         if (Dead) {
             if (Input.GetButtonDown("Restart")) {
-                Restart();
+                ((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
             }
         }
         if (FreezeBool) {

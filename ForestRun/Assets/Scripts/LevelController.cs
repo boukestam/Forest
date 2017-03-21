@@ -139,9 +139,9 @@ public class LevelManager {
     private void EnterScorePanel() {
         if (playerController.getPoints() > PlayerPrefs.GetInt("Level" + (currentLevel + 1) + "_score")) {
             PlayerPrefs.SetInt("Level" + (currentLevel + 1) + "_score", playerController.getPoints());
-            PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 2);
-            PlayerPrefs.SetInt("Level" + (currentLevel + 2), 1);
         }
+        PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 2);
+        PlayerPrefs.SetInt("Level" + (currentLevel + 2), 1);
         scoreMenu = true;
         scorePanel.SetActive(true);
         int score = playerController.getPoints();
@@ -173,11 +173,15 @@ public class LevelManager {
     }
 
     public void NextLevel() {
+        if (currentLevel >= levels.Count - 1) {
+            GameObject.Find("Controller").GetComponent<MenuController>().OnMainMenu();
+            return;
+        }
         playerController.setPoints(0);
         ExitScorePanel();
         levels[currentLevel].ClearLevel();
         currentLevel++;
-        //Unlock new level and save this level as last level
+
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
@@ -188,11 +192,7 @@ public class LevelManager {
     public void Update() {
         if (scoreMenu) {
             if (Input.GetButtonDown("Jump")) {
-                if (currentLevel >= levels.Count - 1) {
-                    GameObject.Find("Controller").GetComponent<MenuController>().OnMainMenu();
-                } else {
-                    NextLevel();
-                }
+                NextLevel();
             }
         } else {
             // Check for going to new level.
@@ -202,7 +202,7 @@ public class LevelManager {
 
             levels[currentLevel].Update();
             if (currentLevel + 1 < levels.Count) {
-                levels[currentLevel + 1].Update();
+                levels[currentLevel].Update();
             }
         }
     }
