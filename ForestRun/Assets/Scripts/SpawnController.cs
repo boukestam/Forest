@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SpawnController : MonoBehaviour {
@@ -106,14 +107,29 @@ public class Chunk {
             UnityEngine.Random.InitState(seed++);
             Vector3 randomPosition = new Vector3(UnityEngine.Random.Range(SpawnArea.xMin, SpawnArea.xMax), 0, UnityEngine.Random.Range(SpawnArea.yMin, SpawnArea.yMax));
 
+            this.SpawnRandom(randomPosition);
+        }
+    }
+
+    public void SpawnRandom(Vector3 pos, string[] bannedList = null) {
+        for(int i = 0; i < 100; i++) {
+            bool found = false;
+
             // Spawn a random GameObject in the average of the density of all combined GameObjects.
             double randNum = rand.NextDouble() * chunkTemplate.TotalDensity;
             for (int i2 = 0; i2 < chunkTemplate.SpawnTypes.Count; i2++) {
                 randNum -= chunkTemplate.SpawnTypes[i2].Density();
                 if (randNum < 0) {
-                    chunkTemplate.SpawnTypes[i2].SpawnFunc(chunkTemplate.SpawnTypes[i2], randomPosition, Spawned);
-                    break;
+                    if (bannedList == null || !bannedList.Contains(chunkTemplate.SpawnTypes[i2].resourceName)) {
+                        chunkTemplate.SpawnTypes[i2].SpawnFunc(chunkTemplate.SpawnTypes[i2], pos, Spawned);
+                        found = true;
+                        break;
+                    }
                 }
+            }
+
+            if (found) {
+                break;
             }
         }
     }

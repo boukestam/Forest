@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour {
 
     //vars for enchantedMovement
     public bool enchantedMovement = true;
-    public float maxRotation = 45f;
+    public float maxRotation = 90f;
     private float rotationSpeed = 2.5f;
 
     void Start () {

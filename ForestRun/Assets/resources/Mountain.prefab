@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4712280674804192}
   - component: {fileID: 33405885018461512}
-  - component: {fileID: 65918657794006482}
   - component: {fileID: 23113712640057430}
   m_Layer: 0
   m_Name: Mountain
@@ -37,6 +36,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4196834204156352}
+  - component: {fileID: 65587466189709380}
   m_Layer: 0
   m_Name: Mountain
   m_TagString: Untagged
@@ -109,15 +109,15 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1688943970536360}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &65918657794006482
+--- !u!65 &65587466189709380
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1688943970536360}
+  m_GameObject: {fileID: 1946697438546516}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: -1.0540898, y: -10.003355, z: 10.153403}
+  m_Center: {x: 0.003611803, y: 5.0203037, z: 0.10642862}

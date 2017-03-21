@@ -359,33 +359,66 @@ public class Level {
             if (chunkStartZ >= this.StartZ) { // Prevent new chunk spawning before the map.
                 Chunk newChunk = new Chunk(Template, new Rect(-ChunkWidthRadius, chunkStartZ, ChunkWidthRadius * 2, ChunkLength));
 
-                float clearRadius = 2;
-
+                // Clear objects from path
+                float clearRadius = 1;
                 List<GameObject> spawned = newChunk.GetSpawned();
 
                 for (int i = 0; i < spawned.Count; i++) {
                     GameObject obj = spawned[i];
 
                     if (obj.tag != "Ground") {
-                        foreach (Vector3 pathPoint in path) {
-                            if ((obj.transform.position - pathPoint).magnitude < clearRadius) {
-                                SpawnController.Destroy(obj);
-                                spawned.RemoveAt(i);
-                                i--;
-                                break;
+                        Collider collider = obj.GetComponent<Collider>();
+
+                        if (collider != null) {
+                            foreach (Vector3 pathPoint in path) {
+                                if (Mathf.Abs(pathPoint.z - collider.bounds.center.z) < 10) {
+                                    float distance = Vector3.Distance(collider.bounds.center, pathPoint);
+
+                                    Vector3 closestPoint = collider.bounds.ClosestPoint(pathPoint);
+                                    float closestDistance = Vector3.Distance(closestPoint, pathPoint);
+
+                                    if (distance < clearRadius || closestDistance < clearRadius) {
+                                        SpawnController.Destroy(obj);
+                                        spawned.RemoveAt(i);
+                                        i--;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                /*
+                // Add objects on path
+                Random.InitState(Seed);
+                int pathI = Random.Range(8, 12);
+                while(pathI < path.Count) {
+                    float z = pathI + path[0].z;
+
+                    if (z >= chunkStartZ && z <= chunkStartZ + ChunkLength) {
+                        for (int i = 0; i < bones.Count; i++) {
+                            if(Mathf.Abs(bones[i].z - z) < 2) {
+                                pathI++;
+                                goto endPathLoop;
+                            }
+                        }
+
+                        Vector3 pathPoint = path[pathI];
+                        newChunk.SpawnRandom(new Vector3(pathPoint.x, 0f, pathPoint.z), new string[] { "Grass" });
+                    }
+
+                    pathI += Random.Range(8, 12);
+
+                    endPathLoop: { }
+                }
+
+                // Draw path
                 GameObject pathBlueprint = (GameObject)Resources.Load("Path");
                 foreach (Vector3 pathPoint in path) {
                     if (newChunk.SpawnArea.Contains(new Vector2(pathPoint.x, pathPoint.z))) {
                         spawned.Add(SpawnController.Instantiate(pathBlueprint, new Vector3(pathPoint.x, 0.01f, pathPoint.z), new Quaternion()));
                     }
                 }
-                */
 
                 // Add bones to the chunk.
                 Random.InitState(System.DateTime.Now.Millisecond);
