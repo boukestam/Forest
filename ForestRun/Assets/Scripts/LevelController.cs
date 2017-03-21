@@ -99,7 +99,13 @@ public class LevelController : MonoBehaviour {
     }
 
     public void RestartCurrentLevel() {
+        ((PlayerController)GameObject.Find("Player").GetComponent("PlayerController")).Restart();
+
         levelManager.RestartCurrentLevel();
+    }
+
+    public void NextLevel() {
+        levelManager.NextLevel();
     }
 }
 
@@ -166,7 +172,7 @@ public class LevelManager {
         playerController.Unfreeze();
     }
 
-    private void NextLevel() {
+    public void NextLevel() {
         playerController.setPoints(0);
         ExitScorePanel();
         levels[currentLevel].ClearLevel();
@@ -202,6 +208,7 @@ public class LevelManager {
     }
 
     public void RestartCurrentLevel() {
+        ExitScorePanel();
         levels[currentLevel].ResetLevel();
         if (currentLevel + 1 < levels.Count) {
             levels[currentLevel + 1].ClearLevel();
