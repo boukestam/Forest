@@ -80,11 +80,15 @@ public class PlayerController : MonoBehaviour {
             if (GetComponent<Rigidbody>().velocity.y <= 0) {
                 Grounded = true;
             }
-        } else if(collision.collider.tag == "Item") {
-            Destroy(collision.collider.gameObject);
-            addPoints(1);
         } else {
             Die();
+        }
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if (other.tag == "Item") {
+            Destroy(other.gameObject);
+            addPoints(1);
         }
     }
 

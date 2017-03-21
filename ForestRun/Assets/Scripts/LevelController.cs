@@ -59,20 +59,21 @@ public class LevelController : MonoBehaviour {
         }, (GameObject)Resources.Load("PlaneGrass"));
 
         ChunkTemplate cityChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.01f),
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.03f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
         ChunkTemplate cityChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.01f),
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.02f),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.015f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
         ChunkTemplate cityChunkTemplate3 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.01f),
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.045f),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.02f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
@@ -239,6 +240,7 @@ public class Level {
     private List<Chunk> chunks = new List<Chunk>();
     List<Vector3> path = new List<Vector3>();
     List<Vector3> bones = new List<Vector3>();
+    private int spawnedBoneLocation = 0;
 
     private int Seed;
 
@@ -355,6 +357,7 @@ public class Level {
         this.furdestPlacedEdge = StartZ;
         path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
+        spawnedBoneLocation = 0;
     }
 
     private void RemoveChunk(int index) {
@@ -462,13 +465,15 @@ public class Level {
 
                 // Add bones to the chunk.
                 Random.InitState(System.DateTime.Now.Millisecond);
-                for (int i = 0; i < bones.Count; i++) {
+                for (int i = spawnedBoneLocation; i < bones.Count; i++) {
                     Vector3 boneLocation = new Vector3(bones[i].x, bones[i].y, bones[i].z);
                     if (boneLocation.z >= chunkStartZ && boneLocation.z <= chunkStartZ + ChunkLength) {
                         boneLocation.z -= chunkStartZ;
                         SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
+                        spawnedBoneLocation++;
+                    } else {
+                        break;
                     }
-
                 }
 
                 // If last chunk add finish plane.

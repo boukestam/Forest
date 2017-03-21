@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class SpawnController : MonoBehaviour {
     public static void spawnTreeFunc(SpawnableDensityObject self, Vector3 pos, List<GameObject> Spawned) {
-        GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
+        GameObject obj = Instantiate(self.Resource, pos, Quaternion.Euler(self.Resource.transform.localEulerAngles + new Vector3(0, UnityEngine.Random.Range(0, 360), 0)));
         Spawned.Add(obj);
         obj.transform.parent = self.ParentObject.transform;
     }
