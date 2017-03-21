@@ -104,10 +104,6 @@ public class LevelController : MonoBehaviour {
 
         levelManager.RestartCurrentLevel();
     }
-
-    public void NextLevel() {
-        levelManager.NextLevel();
-    }
 }
 
 public class LevelManager {
@@ -121,6 +117,7 @@ public class LevelManager {
     bool scoreMenu = false;
 
     public LevelManager() {
+        Level.pathX = 0;
         scorePanel = GameObject.Find("ScorePanel");
 
         star1 = GameObject.Find("Star1");
@@ -181,8 +178,8 @@ public class LevelManager {
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
-        playerController.gameObject.transform.position = new Vector3(0, playerController.gameObject.transform.position.y, playerController.gameObject.transform.position.z);
-        playerController.gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
+        //playerController.gameObject.transform.position = new Vector3(0, playerController.gameObject.transform.position.y, playerController.gameObject.transform.position.z);
+        //playerController.gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
     }
 
     public void Update() {
@@ -224,6 +221,8 @@ public class Level {
     public int levelNumber;
     public bool unlocked;
     public bool isInteractable;
+
+    public static float pathX=0;
 
     private static float StartDespawnZ = -10;
     private static float MinimumRenderDistanceZ = 80;
@@ -364,6 +363,7 @@ public class Level {
         path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
         spawnedBoneLocation = 0;
+        pathX = 0;
     }
 
     private void RemoveChunk(int index) {
@@ -373,7 +373,6 @@ public class Level {
 
     private List<Vector3> GetPath(float startZ, float endZ, float randomness, float pathStepSize) {
         List<Vector3> path = new List<Vector3>();
-        float x = 0;
         float deltaX = 0;
 
         float maxDeltaX = 0.5f;
@@ -381,7 +380,7 @@ public class Level {
         Random.InitState(this.Seed + (int)(startZ * 100));
 
         for (float z = startZ; z < endZ; z += pathStepSize) {
-            Vector3 pathPoint = new Vector3(x, 0, z);
+            Vector3 pathPoint = new Vector3(pathX, 0, z);
             path.Add(pathPoint);
 
             deltaX += Random.Range(-randomness, randomness);
@@ -392,11 +391,11 @@ public class Level {
                 deltaX = -maxDeltaX;
             }
 
-            if (Mathf.Abs(x + (deltaX * 10)) > this.ChunkWidthRadius) {
+            if (Mathf.Abs(pathX + (deltaX * 10)) > this.ChunkWidthRadius) {
                 deltaX *= 0.5f;
             }
 
-            x += deltaX;
+            pathX += deltaX;
         }
 
         return path;

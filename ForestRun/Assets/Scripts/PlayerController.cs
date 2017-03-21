@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject DeathPanel;
     private GameObject Dog;
 
-    private float sideMovement = 0.0f;
+    //private float sideMovement = 0.0f;
     private int points = 0;
 
     //vars for enchantedMovement
