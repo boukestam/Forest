@@ -191,6 +191,7 @@ public class LevelManager {
                 if (currentLevel >= levels.Count - 1) {
                     GameObject.Find("Controller").GetComponent<MenuController>().OnMainMenu();
                 } else {
+                    Input.ResetInputAxes();
                     NextLevel();
                 }
             }
