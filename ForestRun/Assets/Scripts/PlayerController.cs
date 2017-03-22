@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour {
     Vector3 zeroAc;
     Vector3 curAc;
 
+    AudioClip jumpClip;
+    AudioClip boneClip;
+    AudioClip hitClip;
+
     void Start () {
         Score = GameObject.Find("Score");
 
@@ -40,6 +44,10 @@ public class PlayerController : MonoBehaviour {
 
         zeroAc = Input.acceleration;
         curAc = Vector3.zero;
+
+        jumpClip = (AudioClip)Resources.Load("Sounds/jump");
+        boneClip = (AudioClip)Resources.Load("Sounds/trash");
+        hitClip = (AudioClip)Resources.Load("Sounds/hit");
     }
 
     public void addPoints(int amount) {
@@ -89,6 +97,7 @@ public class PlayerController : MonoBehaviour {
             }
         } else {
             Die();
+            GetComponent<AudioSource>().PlayOneShot(hitClip);
         }
     }
 
@@ -96,6 +105,7 @@ public class PlayerController : MonoBehaviour {
         if (other.tag == "Item") {
             Destroy(other.gameObject);
             addPoints(1);
+            GetComponent<AudioSource>().PlayOneShot(boneClip, 0.25f);
         }
     }
 
@@ -111,16 +121,16 @@ public class PlayerController : MonoBehaviour {
 #if UNITY_IPHONE || UNITY_ANDROID
         foreach (var touch in Input.touches) {
             if (touch.phase == TouchPhase.Ended && Grounded) {
-
                 GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
                 Grounded = false;
+                GetComponent<AudioSource>().PlayOneShot(jumpClip);
             }
         }
 #else
         if (Grounded && Input.GetButtonDown("Jump")) {
-
             GetComponent<Rigidbody>().AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
             Grounded = false;
+            GetComponent<AudioSource>().PlayOneShot(jumpClip);
         }
 #endif
     }
