@@ -99,6 +99,10 @@ public class LevelController : MonoBehaviour {
         LevelManager.levels = lvls;
     }
 
+    public void NextLevel() {
+        levelManager.NextLevel();
+    }
+
     public void RestartCurrentLevel() {
         ((PlayerController)GameObject.Find("Player").GetComponent("PlayerController")).Restart();
 
