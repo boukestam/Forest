@@ -79,8 +79,8 @@ public class LevelController : MonoBehaviour {
 
         GameObject walls = (GameObject)Resources.Load("Mountain");
         GameObject building = (GameObject)Resources.Load("Building");
-        int amountOfBones = 20;
         int levelLength = 200;
+        int amountOfBones = (int)(0.04 * (double)levelLength);
         float levelWidth = 30;
         List<Level> lvls = new List<Level>();
 
