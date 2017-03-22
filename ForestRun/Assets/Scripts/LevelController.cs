@@ -80,7 +80,7 @@ public class LevelController : MonoBehaviour {
         GameObject walls = (GameObject)Resources.Load("Mountain");
         GameObject building = (GameObject)Resources.Load("Building");
         int amountOfBones = 20;
-        int levelLength = 400;
+        int levelLength = 200;
         float levelWidth = 30;
         List<Level> lvls = new List<Level>();
 
@@ -97,6 +97,10 @@ public class LevelController : MonoBehaviour {
         lvls.Add(new Level(lvls.Count + 1, cityChunkTemplate3, building, lvls[lvls.Count - 1].EndZ, lvls[lvls.Count - 1].EndZ + levelLength, levelWidth, amountOfBones));
         lvls[lvls.Count - 1].SetLastLevel(true);
         LevelManager.levels = lvls;
+    }
+
+    public void NextLevel() {
+        levelManager.NextLevel();
     }
 
     public void RestartCurrentLevel() {
@@ -212,7 +216,7 @@ public class LevelManager {
             levels[currentLevel + 1].ClearLevel();
         }
         GameObject player = GameObject.FindWithTag("Player");
-        player.transform.position = new Vector3(0, 0, levels[currentLevel].StartZ);
+        player.transform.position = new Vector3(levels[currentLevel].path[0].x, 0, levels[currentLevel].StartZ);
         player.transform.eulerAngles = new Vector3(0, 0, 0);
     }
 }
@@ -226,7 +230,7 @@ public class Level {
     public static float pathX=0;
 
     private static float StartDespawnZ = -10;
-    private static float MinimumRenderDistanceZ = 80;
+    private static float MinimumRenderDistanceZ = 70;
     private static float ChunkLength = 2;
 
     private GameObject Player;
@@ -244,7 +248,7 @@ public class Level {
     GameObject rememberEdgeRight = null;
 
     private List<Chunk> chunks = new List<Chunk>();
-    List<Vector3> path = new List<Vector3>();
+    public List<Vector3> path = new List<Vector3>();
     List<Vector3> bones = new List<Vector3>();
     private int spawnedBoneLocation = 0;
 
@@ -361,10 +365,8 @@ public class Level {
         SpawnController.Destroy(rememberEdgeLeft);
         SpawnController.Destroy(rememberEdgeRight);
         this.furdestPlacedEdge = StartZ;
-        path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
         spawnedBoneLocation = 0;
-        pathX = 0;
     }
 
     private void RemoveChunk(int index) {
