@@ -59,20 +59,21 @@ public class LevelController : MonoBehaviour {
         }, (GameObject)Resources.Load("PlaneGrass"));
 
         ChunkTemplate cityChunkTemplate1 = new ChunkTemplate(new List<SpawnableGroup>() {
-            new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.01f),
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.03f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
         ChunkTemplate cityChunkTemplate2 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.01f),
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.02f),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.015f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
         ChunkTemplate cityChunkTemplate3 = new ChunkTemplate(new List<SpawnableGroup>() {
+            new SpawnableGroup("Trash", SpawnController.spawnTreeFunc, () => 0.01f),
             new SpawnableGroup("Cloud", SpawnController.spawnCloudFunc, () => cloudDensity),
-            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.045f),
+            new SpawnableGroup("Car", SpawnController.spawnTreeFunc, () => 0.02f),
             new SpawnableGroup("Lamppost", SpawnController.spawnFenceFunc, () => 0.015f)
         }, (GameObject)Resources.Load("PlaneAsphalt"));
 
@@ -103,13 +104,8 @@ public class LevelController : MonoBehaviour {
 
         levelManager.RestartCurrentLevel();
     }
-
-    public void NextLevel() {
-        levelManager.NextLevel();
-    }
 }
 
-[System.Serializable]
 public class LevelManager {
     public static List<Level> levels;
     private int currentLevel;
@@ -121,6 +117,7 @@ public class LevelManager {
     bool scoreMenu = false;
 
     public LevelManager() {
+        Level.pathX = 0;
         scorePanel = GameObject.Find("ScorePanel");
 
         star1 = GameObject.Find("Star1");
@@ -139,9 +136,9 @@ public class LevelManager {
     private void EnterScorePanel() {
         if (playerController.getPoints() > PlayerPrefs.GetInt("Level" + (currentLevel + 1) + "_score")) {
             PlayerPrefs.SetInt("Level" + (currentLevel + 1) + "_score", playerController.getPoints());
-            PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 2);
-            PlayerPrefs.SetInt("Level" + (currentLevel + 2), 1);
         }
+        PlayerPrefs.SetInt("lastPlayedLevel", currentLevel + 2);
+        PlayerPrefs.SetInt("Level" + (currentLevel + 2), 1);
         scoreMenu = true;
         scorePanel.SetActive(true);
         int score = playerController.getPoints();
@@ -173,27 +170,27 @@ public class LevelManager {
     }
 
     public void NextLevel() {
+        if (currentLevel >= levels.Count - 1) {
+            GameObject.Find("Controller").GetComponent<MenuController>().OnMainMenu();
+            return;
+        }
         playerController.setPoints(0);
         ExitScorePanel();
         levels[currentLevel].ClearLevel();
         currentLevel++;
-        //Unlock new level and save this level as last level
+
         if (currentLevel >= levels.Count) {
             currentLevel = levels.Count - 1;
         }
-        playerController.gameObject.transform.position = new Vector3(0, playerController.gameObject.transform.position.y, playerController.gameObject.transform.position.z);
-        playerController.gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
+        //playerController.gameObject.transform.position = new Vector3(0, playerController.gameObject.transform.position.y, playerController.gameObject.transform.position.z);
+        //playerController.gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
     }
 
     public void Update() {
         if (scoreMenu) {
             if (Input.GetButtonDown("Jump")) {
-                if (currentLevel >= levels.Count - 1) {
-                    GameObject.Find("Controller").GetComponent<MenuController>().OnMainMenu();
-                } else {
-                    Input.ResetInputAxes();
-                    NextLevel();
-                }
+                Input.ResetInputAxes();
+                NextLevel();
             }
         } else {
             // Check for going to new level.
@@ -226,6 +223,8 @@ public class Level {
     public bool unlocked;
     public bool isInteractable;
 
+    public static float pathX=0;
+
     private static float StartDespawnZ = -10;
     private static float MinimumRenderDistanceZ = 80;
     private static float ChunkLength = 2;
@@ -247,6 +246,7 @@ public class Level {
     private List<Chunk> chunks = new List<Chunk>();
     List<Vector3> path = new List<Vector3>();
     List<Vector3> bones = new List<Vector3>();
+    private int spawnedBoneLocation = 0;
 
     private int Seed;
 
@@ -363,6 +363,8 @@ public class Level {
         this.furdestPlacedEdge = StartZ;
         path = GetPath(this.StartZ, this.EndZ, 0.3f, 1);
         GenerateBoneLocations(path);
+        spawnedBoneLocation = 0;
+        pathX = 0;
     }
 
     private void RemoveChunk(int index) {
@@ -372,7 +374,6 @@ public class Level {
 
     private List<Vector3> GetPath(float startZ, float endZ, float randomness, float pathStepSize) {
         List<Vector3> path = new List<Vector3>();
-        float x = 0;
         float deltaX = 0;
 
         float maxDeltaX = 0.5f;
@@ -380,7 +381,7 @@ public class Level {
         Random.InitState(this.Seed + (int)(startZ * 100));
 
         for (float z = startZ; z < endZ; z += pathStepSize) {
-            Vector3 pathPoint = new Vector3(x, 0, z);
+            Vector3 pathPoint = new Vector3(pathX, 0, z);
             path.Add(pathPoint);
 
             deltaX += Random.Range(-randomness, randomness);
@@ -391,11 +392,11 @@ public class Level {
                 deltaX = -maxDeltaX;
             }
 
-            if (Mathf.Abs(x + (deltaX * 10)) > this.ChunkWidthRadius) {
+            if (Mathf.Abs(pathX + (deltaX * 10)) > this.ChunkWidthRadius) {
                 deltaX *= 0.5f;
             }
 
-            x += deltaX;
+            pathX += deltaX;
         }
 
         return path;
@@ -470,13 +471,15 @@ public class Level {
 
                 // Add bones to the chunk.
                 Random.InitState(System.DateTime.Now.Millisecond);
-                for (int i = 0; i < bones.Count; i++) {
+                for (int i = spawnedBoneLocation; i < bones.Count; i++) {
                     Vector3 boneLocation = new Vector3(bones[i].x, bones[i].y, bones[i].z);
                     if (boneLocation.z >= chunkStartZ && boneLocation.z <= chunkStartZ + ChunkLength) {
                         boneLocation.z -= chunkStartZ;
                         SpawnController.spawnItem(newChunk, (GameObject)Resources.Load("BoneItem"), boneLocation);
+                        spawnedBoneLocation++;
+                    } else {
+                        break;
                     }
-
                 }
 
                 // If last chunk add finish plane.

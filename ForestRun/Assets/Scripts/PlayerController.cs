@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject DeathPanel;
     private GameObject Dog;
 
-    private float sideMovement = 0.0f;
+    //private float sideMovement = 0.0f;
     private int points = 0;
 
     //vars for enchantedMovement
@@ -56,23 +56,27 @@ public class PlayerController : MonoBehaviour {
 
     public void Freeze() {
         FreezeBool = true;
-        Dog.GetComponent<Animation>().Stop();
+        if (Dog != null)
+            Dog.GetComponent<Animation>().Stop();
     }
 
     public void Unfreeze() {
         FreezeBool = false;
-        Dog.GetComponent<Animation>().Play();
+        if (Dog != null)
+            Dog.GetComponent<Animation>().Play();
     }
 
     void Die() {
         Dead = true;
-        DeathPanel.SetActive(true);
+        if (DeathPanel != null)
+            DeathPanel.SetActive(true);
         Freeze();
     }
 
     public void Restart() {
         Dead = false;
-        DeathPanel.SetActive(false);
+        if (DeathPanel != null)
+            DeathPanel.SetActive(false);
         Unfreeze();
         setPoints(0);
         //((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
@@ -83,18 +87,22 @@ public class PlayerController : MonoBehaviour {
             if (GetComponent<Rigidbody>().velocity.y <= 0) {
                 Grounded = true;
             }
-        } else if(collision.collider.tag == "Item") {
-            Destroy(collision.collider.gameObject);
-            addPoints(1);
         } else {
             Die();
+        }
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if (other.tag == "Item") {
+            Destroy(other.gameObject);
+            addPoints(1);
         }
     }
 
     private void Update() {
         if (Dead) {
             if (Input.GetButtonDown("Restart")) {
-                Restart();
+                ((LevelController)GameObject.Find("LevelCreator").GetComponent("LevelController")).RestartCurrentLevel();
             }
         }
         if (FreezeBool) {
